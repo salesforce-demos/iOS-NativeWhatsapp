@@ -1,0 +1,691 @@
+{
+  "chats": [
+    {
+      "chatConfig": {
+        "configName": "Luxury Horology Boutique",
+        "contactName": "Alexander",
+        "contactFirstName": "Alexander",
+        "agentImageURL": "https://i.pravatar.cc/150?u=luxury_agent",
+        "contactImageURL": "https://i.pravatar.cc/150?u=client_alexander",
+        "botImageURL": "https://ui-avatars.com/api/?name=Chronos&background=0D8ABC&color=fff",
+        "otherImageURL": "https://i.pravatar.cc/150?u=store_manager",
+        "botName": "Chronos Bot",
+        "agentName": "Arthur",
+        "joinConsecutiveMessages": false,
+        "transcriptSpeed": 300,
+        "hourFormat24": false,
+        "showAMPM": true,
+        "isSynchronic": false,
+        "startFromBottom": false,
+        "statusBar": {
+          "lockscreen": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.40,
+            "isCharging": true
+          },
+          "chatview": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.90,
+            "isCharging": false
+          }
+        },
+        "notifications": [
+          {
+            "appName": "Chrono24",
+            "iconName": "clock.fill",
+            "iconColor": "#000000",
+            "title": "Market Alert",
+            "message": "The market value for your Tissot PRX has updated",
+            "timeAgo": "now"
+          },
+          {
+            "appName": "Mail",
+            "iconName": "envelope.fill",
+            "iconColor": "#007AFF",
+            "title": "Boutique Concierge",
+            "message": "Your private viewing appointment is confirmed",
+            "timeAgo": "10 min"
+          }
+        ],
+        "messagesFilteredByDate": [
+          {
+            "day": "Today",
+            "shown": true,
+            "messages": [
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:15 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 1,
+                "text": "Welcome to the Premiere Horology Boutique. My name is Arthur.",
+                "sendAutimatically": false,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:15 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 2,
+                "text": "How may I assist you in finding your next timepiece?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:18 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 3,
+                "text": "Hello Arthur. I'm looking for a luxury daily wearer.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:18 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 4,
+                "text": "Something automatic, slightly sporty but elegant enough for the office.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:22 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 5,
+                "text": "An excellent request. Do you have a preference between a classic Swiss chronograph or Japanese precision?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:25 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 6,
+                "text": "I appreciate both. I am currently considering Omega and Seiko.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:28 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 7,
+                "text": "I have two exceptional pieces in our vault. Which would you like to examine first?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [
+                  {
+                    "text": "Omega Speedmaster Professional",
+                    "order": 1,
+                    "imageURL": "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=150&q=80",
+                    "isSelectable": true,
+                    "selected": false
+                  },
+                  {
+                    "text": "Grand Seiko Snowflake (SBGA211)",
+                    "order": 2,
+                    "imageURL": "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=150&q=80",
+                    "isSelectable": true,
+                    "selected": false
+                  }
+                ],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:35 AM",
+                "imageURL": "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=600&q=80",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 8,
+                "text": "The legendary 'Moonwatch'. Master Chronometer certified, featuring a black step dial and the iconic tachymeter bezel.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:38 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 9,
+                "text": "Beautiful. Could I also see the Grand Seiko for comparison?",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:42 AM",
+                "imageURL": "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=600&q=80",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 10,
+                "text": "The Grand Seiko 'Snowflake'. High-intensity titanium case with the revolutionary Spring Drive movement.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:50 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 11,
+                "text": "That textured dial is stunning. I think the Grand Seiko is exactly what I am looking for.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "10:55 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 12,
+                "text": "A connoisseur's choice. Shall I prepare the digital invoice and arrange insured overnight delivery?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "11:02 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 13,
+                "text": "Yes, please proceed. Thank you, Arthur.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "11:05 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 14,
+                "text": "It is my pleasure. The secure payment link has been sent to your email. Congratulations on an extraordinary acquisition.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "chatConfig": {
+        "configName": "Premium Real Estate",
+        "contactName": "Carlos",
+        "contactFirstName": "Carlos",
+        "agentImageURL": "https://i.pravatar.cc/150?u=sofia_realtor",
+        "contactImageURL": "https://i.pravatar.cc/150?u=client_sofia",
+        "botImageURL": "",
+        "otherImageURL": "",
+        "botName": "",
+        "agentName": "Carlos",
+        "joinConsecutiveMessages": false,
+        "transcriptSpeed": 350,
+        "hourFormat24": false,
+        "showAMPM": true,
+        "isSynchronic": false,
+        "startFromBottom": false,
+        "statusBar": {
+          "lockscreen": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.40,
+            "isCharging": true
+          },
+          "chatview": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.90,
+            "isCharging": false
+          }
+        },
+        "notifications": [],
+        "messagesFilteredByDate": [
+          {
+            "day": "Today",
+            "shown": true,
+            "messages": [
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:00 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 1,
+                "text": "Good morning! I'm Carlos from Prestige Properties. How can I help you today?",
+                "sendAutimatically": false,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:02 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 2,
+                "text": "Hi Carlos, I'm looking for a penthouse in the city center with a rooftop terrace.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:04 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 3,
+                "text": "Excellent taste! What is your preferred budget range?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [
+                  {
+                    "text": "$2M - $4M",
+                    "order": 1,
+                    "imageURL": "",
+                    "isSelectable": true,
+                    "selected": false
+                  },
+                  {
+                    "text": "$4M - $8M",
+                    "order": 2,
+                    "imageURL": "",
+                    "isSelectable": true,
+                    "selected": false
+                  },
+                  {
+                    "text": "Above $8M",
+                    "order": 3,
+                    "imageURL": "",
+                    "isSelectable": true,
+                    "selected": false
+                  }
+                ],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:08 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 4,
+                "text": "I have a stunning 4,200 sq ft penthouse at Skyline Tower with panoramic views.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:08 AM",
+                "imageURL": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 5,
+                "text": "Private rooftop, infinity pool, and concierge service included.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:15 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 6,
+                "text": "This looks incredible! Can we schedule a private viewing?",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:17 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 7,
+                "text": "Absolutely. I have availability this Thursday at 3 PM or Saturday morning. Which works for you?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:20 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 8,
+                "text": "Thursday at 3 PM works perfectly. Looking forward to it!",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "9:22 AM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 9,
+                "text": "Confirmed! I'll send the address and access details to your email. See you Thursday!",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "chatConfig": {
+        "configName": "Elite Travel Concierge",
+        "contactName": "Marcus",
+        "contactFirstName": "Marcus",
+        "agentImageURL": "https://i.pravatar.cc/150?u=marcus_travel",
+        "contactImageURL": "https://i.pravatar.cc/150?u=client_marcus",
+        "botImageURL": "",
+        "otherImageURL": "",
+        "botName": "",
+        "agentName": "Marcus",
+        "joinConsecutiveMessages": false,
+        "transcriptSpeed": 280,
+        "hourFormat24": false,
+        "showAMPM": true,
+        "isSynchronic": false,
+        "startFromBottom": false,
+        "statusBar": {
+          "lockscreen": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.40,
+            "isCharging": true
+          },
+          "chatview": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.90,
+            "isCharging": false
+          }
+        },
+        "notifications": [],
+        "messagesFilteredByDate": [
+          {
+            "day": "Today",
+            "shown": true,
+            "messages": [
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:00 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 1,
+                "text": "Welcome to Elite Travel. I'm Marcus, your personal travel concierge.",
+                "sendAutimatically": false,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:00 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 2,
+                "text": "Where in the world shall we take you next?",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:03 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 3,
+                "text": "I'd love a private island getaway for two, somewhere in the Maldives.",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:05 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 4,
+                "text": "Perfect choice. I have two exclusive overwater villas available in June.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [
+                  {
+                    "text": "Soneva Jani — Private Island",
+                    "order": 1,
+                    "imageURL": "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=150&q=80",
+                    "isSelectable": true,
+                    "selected": false
+                  },
+                  {
+                    "text": "Gili Lankanfushi — Crusoe Residence",
+                    "order": 2,
+                    "imageURL": "https://images.unsplash.com/photo-1540541338537-41943b0d97b1?auto=format&fit=crop&w=150&q=80",
+                    "isSelectable": true,
+                    "selected": false
+                  }
+                ],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:12 PM",
+                "imageURL": "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=600&q=80",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 5,
+                "text": "Soneva Jani features a 3-bedroom overwater villa with private pool, a retractable roof for stargazing, and a dedicated butler.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:18 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 6,
+                "text": "The retractable roof sounds magical. Let's go with Soneva Jani!",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:20 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 7,
+                "text": "Wonderful. I'll arrange your private jet transfer from Dubai, a personal chef, and a full-day dolphin cruise.",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:22 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 8,
+                "text": "This is going to be absolutely unforgettable. Thank you Marcus!",
+                "sendAutimatically": false,
+                "sender": "Customer",
+                "options": [],
+                "actions": []
+              },
+              {
+                "replaceByNextMessage": false,
+                "component": "",
+                "day": "Today",
+                "sendTime": "2:24 PM",
+                "imageURL": "",
+                "imageSource": "",
+                "messageShown": false,
+                "order": 9,
+                "text": "My pleasure. Your itinerary and reservation confirmation will be in your inbox within the hour. Bon voyage!",
+                "sendAutimatically": true,
+                "sender": "Agent",
+                "options": [],
+                "actions": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

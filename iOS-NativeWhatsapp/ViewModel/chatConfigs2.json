@@ -1,0 +1,300 @@
+{
+  "einsteinChat": {
+    "chatConfig": {
+      "configName": "Einstein Chat",
+      "contactName": "Einstein",
+      "contactFirstName": "Einstein",
+      "agentImageURL": "https://i.pravatar.cc/150?u=agent_einstein",
+      "contactImageURL": "https://i.pravatar.cc/150?u=john_doe",
+      "botImageURL": "https://robohash.org/einstein-bot.png?set=set1",
+      "otherImageURL": "https://i.pravatar.cc/150?u=support_manager",
+      "botName": "Einstein",
+      "agentName": "Einstein",
+      "joinConsecutiveMessages": false,
+      "transcriptSpeed": 300,
+      "hourFormat24": false,
+      "showAMPM": false,
+      "isSynchronic": false,
+      "startFromBottom": false,
+      "statusBar": {
+        "lockscreen": {
+          "carrier": "T-Mobile",
+          "signalBars": 4,
+          "wifiStrength": 3,
+          "showWifi": true,
+          "levelBattery": 0.85,
+          "isCharging": true
+        },
+        "chatview": {
+          "carrier": "AT&T",
+          "signalBars": 4,
+          "wifiStrength": 3,
+          "showWifi": true,
+          "levelBattery": 0.65,
+          "isCharging": false
+        }
+      },
+      "notifications": [
+      {
+        "appName": "Telegram",
+        "iconName": "paperplane.fill",
+        "iconColor": "#2AABEE",
+        "title": "Sales Team",
+        "message": "New premium lead assigned: John Doe",
+        "timeAgo": "now"
+      },
+      {
+        "appName": "Mail",
+        "iconName": "envelope.fill",
+        "iconColor": "#007AFF",
+        "title": "System Alert",
+        "message": "Inventory updated: MacBook Pro & Dell XPS",
+        "timeAgo": "3 min"
+      },
+      {
+        "appName": "Calendar",
+        "iconName": "calendar",
+        "iconColor": "#FF3B30",
+        "title": "Upcoming Meeting",
+        "message": "Product Demo with TechCorp Inc. starts in 15 minutes",
+        "timeAgo": "5 min"
+      },
+      {
+        "appName": "Slack",
+        "iconName": "number",
+        "iconColor": "#4A154B",
+        "title": "Sarah Jenkins",
+        "message": "Can you send me the latest pricing sheet for the Apple models?",
+        "timeAgo": "12 min"
+      },
+      {
+        "appName": "Salesforce",
+        "iconName": "cloud.fill",
+        "iconColor": "#00A1E0",
+        "title": "Opportunity Closed",
+        "message": "Deal won: Enterprise workstation upgrade for Q3",
+        "timeAgo": "25 min"
+      },
+      {
+        "appName": "Reminders",
+        "iconName": "checklist",
+        "iconColor": "#FF9500",
+        "title": "Follow up",
+        "message": "Call John about the MacBook Pro custom quote",
+        "timeAgo": "1 hr"
+      },
+      {
+        "appName": "Mail",
+        "iconName": "envelope.fill",
+        "iconColor": "#007AFF",
+        "title": "IT Support",
+        "message": "Your weekly security patch is ready to be installed",
+        "timeAgo": "2 hr"
+      }
+    ],
+      "messagesFilteredByDate": [
+        {
+          "day": "Today",
+          "shown": true,
+          "messages": [
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:00 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 1,
+              "text": "Hello! I'm Einstein, your tech consultant. Ready to find your perfect laptop today?",
+              "sendAutimatically": false,
+              "sender": "Agent",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:00 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 2,
+              "text": "Hi! I need a high-performance laptop for 4K video editing and 3D rendering",
+              "sendAutimatically": false,
+              "sender": "Customer",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:01 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 3,
+              "text": "Perfect! For heavy rendering, you'll need dedicated graphics. Do you prefer macOS or Windows?",
+              "sendAutimatically": true,
+              "sender": "Agent",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:01 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 4,
+              "text": "I'm open to both! I need around 15-16\" screen and at least 1TB storage",
+              "sendAutimatically": false,
+              "sender": "Customer",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:02 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 5,
+              "text": "Excellent! I have two amazing options for you. Which one would you like to see?",
+              "sendAutimatically": true,
+              "sender": "Agent",
+              "options": [
+                {
+                  "text": "MacBook Pro 16\" (M3 Max)",
+                  "order": 1,
+                  "imageURL": "",
+                  "isSelectable": true,
+                  "selected": false
+                },
+                {
+                  "text": "Dell XPS 15 (OLED, RTX 4070)",
+                  "order": 2,
+                  "imageURL": "",
+                  "isSelectable": true,
+                  "selected": false
+                }
+              ],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:03 AM",
+              "imageURL": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 7,
+              "text": "Here's the MacBook Pro 16\"! Features M3 Max chip, 36GB RAM, and stunning Liquid Retina XDR display",
+              "sendAutimatically": true,
+              "sender": "Agent",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:04 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 8,
+              "text": "Wow! That looks amazing. What's the battery life like?",
+              "sendAutimatically": false,
+              "sender": "Customer",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:04 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 9,
+              "text": "Up to 22 hours of video playback! Perfect for creators on the go. Want to see the specs?",
+              "sendAutimatically": true,
+              "sender": "Agent",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:05 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 10,
+              "text": "Yes please!",
+              "sendAutimatically": false,
+              "sender": "Customer",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:05 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 11,
+              "text": "Great choice! Shall I prepare a custom quote with AppleCare+ included?",
+              "sendAutimatically": true,
+              "sender": "Agent",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:06 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 12,
+              "text": "That would be fantastic! Thank you",
+              "sendAutimatically": false,
+              "sender": "Customer",
+              "options": [],
+              "actions": []
+            },
+            {
+              "replaceByNextMessage": false,
+              "component": "",
+              "day": "Today",
+              "sendTime": "11:06 AM",
+              "imageURL": "",
+              "imageSource": "",
+              "messageShown": false,
+              "order": 13,
+              "text": "Done! I've sent the checkout link to your email. Enjoy your new MacBook!",
+              "sendAutimatically": true,
+              "sender": "Agent",
+              "options": [],
+              "actions": []
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
