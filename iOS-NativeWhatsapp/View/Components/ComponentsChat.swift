@@ -65,6 +65,7 @@ struct MessageBubble: View {
                         .padding(.top, hasText || hasImage ? 4 : 0)
                     }
                 }
+                .frame(maxWidth: 264, alignment: message.isCurrentUser ? .trailing : .leading)
 
                 if !message.isCurrentUser { Spacer(minLength: 52) }
             }
@@ -265,7 +266,8 @@ private struct WaBubble: View {
             Text(text)
                 .font(.system(size: 16))
                 .foregroundColor(textColor)
-                .frame(maxWidth: 240, alignment: .leading)
+                .multilineTextAlignment(.leading)
+                .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
             metaView
         }
