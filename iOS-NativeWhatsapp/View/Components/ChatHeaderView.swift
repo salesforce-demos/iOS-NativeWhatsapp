@@ -1,92 +1,266 @@
-//
-//  ChatHeaderView.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 23/02/26.
-//
-
 import SwiftUI
 
-// MARK: - ChatHeaderView
-// Fila de navegación del chat (debajo del StatusBar que va en el ZStack padre)
+enum WA {
+    static func p3(_ hex: UInt32) -> Color {
+        Color(
+            .displayP3,
+            red: Double((hex >> 16) & 0xFF) / 255.0,
+            green: Double((hex >> 8) & 0xFF) / 255.0,
+            blue: Double(hex & 0xFF) / 255.0
+        )
+    }
+
+    static let chrome       = p3(0xF2F0EB)
+    static let wallpaper    = p3(0xF3F0EB)
+    static let glassButton  = p3(0xFDFBF5)
+    static let noticeBg     = p3(0xFBF0D6)
+    static let noticeText   = p3(0x0D0D0D)
+    static let datePill     = p3(0xFDFDFC)
+    static let fieldStroke  = p3(0xB2B2B2)
+
+    static let green        = p3(0x50A767)
+    static let chipFill     = p3(0xDFFBD6)
+    static let chipStroke   = p3(0xB2C9AB)
+    static let chipText     = p3(0x2D5E40)
+    static let hairline     = p3(0xCBCBCB)
+    static let divider      = p3(0xE5E5E5)
+    static let searchFill   = p3(0xF5F4F4)
+    static let secondary    = p3(0x6A6B6B)
+    static let subtitle     = p3(0x8A8A8E)
+    static let verified     = p3(0x0866FF)
+
+    static let statusBarHeight: CGFloat = 62
+    static let navRowHeight: CGFloat = 44
+    static let headerBottomPadding: CGFloat = 10
+    static var headerHeight: CGFloat { statusBarHeight + navRowHeight + headerBottomPadding }
+
+    static let inputRowHeight: CGFloat = 48
+    static let inputFieldHeight: CGFloat = 30
+    static let rowAvatarSize: CGFloat = 56
+    static let rowTextLeading: CGFloat = 88
+}
+
+struct WAStatusBarSlot: View {
+    var carrier: String
+    var signalBars: Int
+    var wifiStrength: Int
+    var showWifi: Bool
+    var levelBattery: Double
+    var isCharging: Bool
+
+    var body: some View {
+        StatusBar(
+            carrier: carrier,
+            signalBars: signalBars,
+            wifiStrength: wifiStrength,
+            showWifi: showWifi,
+            foregroundColor: nil,
+            isLockScreen: false,
+            levelBattery: levelBattery,
+            isCharging: isCharging
+        )
+        .frame(height: WA.statusBarHeight - 8)
+        .padding(.top, 8)
+    }
+}
+
+struct WAChatWallpaper: View {
+    var dimmed: Bool = true
+
+    private var hasAsset: Bool { UIImage(named: "fondoWhatsapp") != nil }
+
+    var body: some View {
+        (hasAsset ? Color.white : WA.wallpaper)
+            .overlay {
+                if hasAsset {
+                    Image("fondoWhatsapp")
+                        .resizable()
+                        .scaledToFill()
+                        .opacity(dimmed ? 0.45 : 1.0)
+                }
+            }
+            .clipped()
+            .ignoresSafeArea()
+    }
+}
+
+struct WAGlassCircleButton<Content: View>: View {
+    var diameter: CGFloat = 44
+    var fill: Color = .white
+    var action: () -> Void
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(fill)
+                    .frame(width: diameter, height: diameter)
+                    .shadow(color: .black.opacity(0.07), radius: 5, x: 0, y: 1)
+                content
+            }
+            .frame(width: diameter, height: diameter)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct ChatHeaderView: View {
-    @ObservedObject var vm: ChatViewModel
+    let title: String
+    let subtitle: String
+    let avatarURL: URL?
+    var backBadge: String? = nil
+    var isVerified: Bool = false
+    var isLogoAvatar: Bool = false
     var onBack: () -> Void
-    var onHeaderTap: () -> Void
+    var onTitleTap: () -> Void
+    var onVideoCall: () -> Void = {}
+    var onVoiceCall: () -> Void = {}
 
     var body: some View {
         VStack(spacing: 0) {
-            // Espacio para que el header quede debajo del StatusBar (70pt)
-            Color.clear.frame(height: 70)
+            Color.clear.frame(height: WA.statusBarHeight)
 
-            // Fila de navegación
-            HStack(spacing: 10) {
-                // Botón back
-                Button(action: onBack) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.primary)
+            HStack(spacing: 0) {
+                WAGlassCircleButton(diameter: 45, fill: WA.glassButton, action: onBack) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 19, weight: .semibold))
+                        if let backBadge {
+                            Text(backBadge)
+                                .font(.system(size: 17))
+                        }
+                    }
+                    .foregroundStyle(.black)
                 }
-                .buttonStyle(.plain)
+                .padding(.leading, 19)
 
-                // Avatar + nombre + estado
-                Button(action: onHeaderTap) {
-                    HStack(spacing: 8) {
+                Button(action: onTitleTap) {
+                    HStack(spacing: 12) {
                         AvatarView(
-                            url: vm.contactAvatarURL,
-                            text: vm.contactName.isEmpty ? "?" : vm.contactName,
-                            size: 36
+                            url: avatarURL,
+                            text: title.isEmpty ? "?" : title,
+                            size: 40,
+                            isLogo: isLogoAvatar
                         )
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(vm.contactName.isEmpty ? "Contacto" : vm.contactName)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
-                            Text("online")
+
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack(spacing: 4) {
+                                Text(title.isEmpty ? "Contact" : title)
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundStyle(.black)
+                                    .lineLimit(1)
+                                if isVerified {
+                                    WAVerifiedBadge(size: 15)
+                                }
+                            }
+                            Text(subtitle)
                                 .font(.system(size: 12))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(WA.subtitle)
+                                .lineLimit(1)
                         }
                     }
                 }
                 .buttonStyle(.plain)
+                .padding(.leading, 9)
 
-                Spacer()
+                Spacer(minLength: 8)
 
-                // Iconos de acción
-                HStack(spacing: 16) {
-                    Button(action: { UIImpactFeedbackGenerator(style: .light).impactOccurred() }) {
+                HStack(spacing: 0) {
+                    Button(action: onVideoCall) {
                         Image(systemName: "video")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.primary)
+                            .font(.system(size: 23))
+                            .foregroundStyle(.black)
+                            .frame(width: 55, height: 45)
                     }
                     .buttonStyle(.plain)
 
-                    Button(action: { UIImpactFeedbackGenerator(style: .light).impactOccurred() }) {
+                    Button(action: onVoiceCall) {
                         Image(systemName: "phone")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.primary)
+                            .font(.system(size: 23))
+                            .foregroundStyle(.black)
+                            .frame(width: 55, height: 45)
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(.trailing, 4)
+                .background(
+                    Capsule()
+                        .fill(WA.glassButton)
+                        .shadow(color: .black.opacity(0.07), radius: 5, x: 0, y: 1)
+                )
+                .padding(.trailing, 18)
             }
-            .padding(.horizontal, 14)
-            .frame(height: 44)
-            .background(Color(.systemGray6))
+            .frame(height: WA.navRowHeight)
+
+            Color.clear.frame(height: WA.headerBottomPadding)
         }
+        .frame(height: WA.headerHeight)
+        .background(WA.chrome)
     }
 }
 
-// MARK: - AvatarView
+struct StickerGlyph: Shape {
+    func path(in rect: CGRect) -> Path {
+        let s = min(rect.width, rect.height)
+        let r = s * 0.26
+        let cut = s * 0.50
+
+        var p = Path()
+        p.move(to: CGPoint(x: r, y: 0))
+        p.addLine(to: CGPoint(x: s - r, y: 0))
+        p.addArc(center: CGPoint(x: s - r, y: r), radius: r,
+                 startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        p.addLine(to: CGPoint(x: s, y: s - cut))
+        p.addLine(to: CGPoint(x: s - cut, y: s))
+        p.addLine(to: CGPoint(x: r, y: s))
+        p.addArc(center: CGPoint(x: r, y: s - r), radius: r,
+                 startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+        p.addLine(to: CGPoint(x: 0, y: r))
+        p.addArc(center: CGPoint(x: r, y: r), radius: r,
+                 startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        p.closeSubpath()
+
+        p.move(to: CGPoint(x: s, y: s - cut))
+        p.addQuadCurve(
+            to: CGPoint(x: s - cut, y: s),
+            control: CGPoint(x: s - cut * 0.14, y: s - cut * 0.14)
+        )
+        return p
+    }
+}
+
+struct StickerIcon: View {
+    var size: CGFloat = 17
+    var lineWidth: CGFloat = 1.4
+    var color: Color = .black
+
+    var body: some View {
+        StickerGlyph()
+            .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+            .frame(width: size, height: size)
+    }
+}
+
+struct WAVerifiedBadge: View {
+    var size: CGFloat = 15
+
+    var body: some View {
+        Image(systemName: "checkmark.seal.fill")
+            .font(.system(size: size))
+            .foregroundStyle(WA.verified)
+    }
+}
+
 struct AvatarView: View {
     let url: URL?
     let text: String
     let size: CGFloat
+    var isLogo: Bool = false
 
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color(red: 0.33, green: 0.60, blue: 0.57))
+                .fill(isLogo ? Color.white : Color(red: 0.33, green: 0.60, blue: 0.57))
                 .frame(width: size, height: size)
 
             if let url = url {
@@ -95,11 +269,20 @@ struct AvatarView: View {
                     case .empty:
                         initialsView
                     case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: size, height: size)
-                            .clipShape(Circle())
+                        if isLogo {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .padding(size * 0.12)
+                                .frame(width: size, height: size)
+                                .clipShape(Circle())
+                        } else {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: size, height: size)
+                                .clipShape(Circle())
+                        }
                     case .failure:
                         initialsView
                     @unknown default:
@@ -117,4 +300,20 @@ struct AvatarView: View {
             .font(.system(size: size * 0.42, weight: .semibold))
             .foregroundColor(.white)
     }
+}
+
+#Preview("Header") {
+    VStack(spacing: 0) {
+        ChatHeaderView(
+            title: "Andrés Marín (You)",
+            subtitle: "Message yourself",
+            avatarURL: nil,
+            backBadge: "5",
+            isVerified: true,
+            onBack: {},
+            onTitleTap: {}
+        )
+        WA.wallpaper
+    }
+    .ignoresSafeArea()
 }

@@ -1,51 +1,40 @@
-//
-//  ChatViewModel.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 13/02/26.
-//
-
 import SwiftUI
 import Combine
 
 class ChatViewModel: ObservableObject {
-    // --- ESTADO UI ---
     @Published var messages: [UIMessage] = []
     @Published var isTyping: Bool = false
     @Published var isLoading: Bool = true
     @Published var errorMessage: String? = nil
-    
-    // --- SUGERENCIAS INTELIGENTES ---
+
     @Published var currentSuggestion: String? = nil
     @Published var showSuggestion: Bool = false
-    
-    // --- DATOS HEADER ---
-    @Published var chatTitle: String = "Cargando..."
-    @Published var contactName: String = "Contacto"
-    @Published var contactStatus: String = "conectando..."
-    // Ahora usamos URL opcional en vez de string
+
+    @Published var chatTitle: String = "Loading…"
+    @Published var contactName: String = "Contact"
+    @Published var contactStatus: String = "connecting…"
     @Published var contactAvatarURL: URL? = nil
-    
-    // --- STATUSBAR CONFIG ---
+
     @Published var statusBarChatView: StatusBarSettings? = nil
-    
-    // --- LÓGICA INTERNA ---
+
+    @Published var chatURL: URL? = nil
+    @Published var isVerified: Bool = false
+    @Published var isLogoAvatar: Bool = false
+
     private var script: [JSONMessage] = []
     private var currentStepIndex = 0
     private var transcriptSpeed: Double = 0.5
     private var isLoadingData = false
-    private var waitingForUserSelection = false // Nueva bandera para pausar el flujo
-    
-    // URL Base para reconstruir las imágenes relativas (ahora dinámica)
+    private var waitingForUserSelection = false
+
     private var baseResourceURL: String {
         let fullURL = NetworkService.shared.baseURL
-        
+
         if let url = URL(string: fullURL) {
             let scheme = url.scheme ?? "https"
             let host = url.host ?? ""
             let pathComponents = url.pathComponents.filter { $0 != "/" }
-            
-            // Buscar hasta dónde incluir el path (antes de "resource")
+
             var basePath = ""
             for component in pathComponents {
                 if component.lowercased() == "resource" || component.contains(".json") {
@@ -53,34 +42,30 @@ class ChatViewModel: ObservableObject {
                 }
                 basePath += "/\(component)"
             }
-            
+
             return "\(scheme)://\(host)\(basePath)"
         }
-        
-        // Fallback: retornar la URL completa
+
         return fullURL
     }
-    
+
     init() { }
 
-    /// Inicializa el ViewModel con un ChatConfig ya cargado (desde la lista de chats)
     init(config: ChatConfig) {
         setupChat(with: config)
         isLoading = false
     }
 
     func loadData() {
-        // Evitar cargas concurrentes o duplicadas
         if isLoadingData { return }
         isLoadingData = true
 
-        // Placeholders iniciales
         DispatchQueue.main.async {
             self.isLoading = true
             self.errorMessage = nil
-            self.chatTitle = "Cargando..."
-            self.contactName = self.contactName.isEmpty ? "Contacto" : self.contactName
-            self.contactStatus = "conectando..."
+            self.chatTitle = "Loading…"
+            self.contactName = self.contactName.isEmpty ? "Contact" : self.contactName
+            self.contactStatus = "connecting…"
             self.contactAvatarURL = nil
         }
 
@@ -91,64 +76,72 @@ class ChatViewModel: ObservableObject {
                 self.isLoading = false
                 switch result {
                 case .success(let root):
-                    if let config = root.einsteinChat?.chatConfig {
+                    if let config = root.einsteinChat?.chatConfig ?? root.allChats.first?.chatConfig {
                         self.setupChat(with: config)
                     } else {
-                        self.errorMessage = "No se encontró configuración de chat"
-                        self.contactStatus = "Sin conexión"
+                        self.errorMessage = "Chat configuration not found"
+                        self.contactStatus = "Offline"
                     }
                 case .failure(let error):
                     self.errorMessage = "Error: \(error.localizedDescription)"
-                    self.contactStatus = "Sin conexión"
+                    self.contactStatus = "Offline"
                 }
             }
         }
     }
-    
+
     private func setupChat(with config: ChatConfig) {
         self.chatTitle = config.configName
-        self.contactName = config.contactName.isEmpty ? "Contacto" : config.contactName
-        self.contactStatus = "en línea"
-        
+        self.contactName = config.contactName.isEmpty ? "Contact" : config.contactName
+        self.contactStatus = config.contactStatus ?? "online"
+
+        self.isVerified = config.isVerified ?? false
+        self.isLogoAvatar = (config.avatarStyle ?? "photo").lowercased() == "logo"
+
+        if let raw = config.chatURL?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty {
+            self.chatURL = URL(string: raw)
+        } else {
+            self.chatURL = nil
+        }
+
         if let rawImage = config.agentImageURL ?? config.botImageURL {
             self.contactAvatarURL = resolveImageURL(rawPath: rawImage)
         }
-        
+
         if let statusBarConfig = config.statusBar {
             self.statusBarChatView = statusBarConfig.chatview
         }
-        
+
         let speedMs = Double(config.transcriptSpeed ?? 500)
         self.transcriptSpeed = speedMs / 1000.0
-        
+
         self.script = config.messagesFilteredByDate?
             .flatMap { $0.messages ?? [] } ?? []
-        
+
         self.currentStepIndex = 0
         self.messages = []
-        
+
         checkNextStep()
     }
-    
+
     private func resolveImageURL(rawPath: String) -> URL? {
         if rawPath.hasPrefix("http") {
             return URL(string: rawPath)
         }
-        
+
         var cleanPath = rawPath
         if cleanPath.hasPrefix("..") {
             cleanPath = String(cleanPath.dropFirst(2))
         }
-        
+
         if !cleanPath.hasPrefix("/") {
             cleanPath = "/" + cleanPath
         }
-        
+
         let fullString = baseResourceURL + cleanPath
         return URL(string: fullString)
     }
-    
-    
+
     func manualTrigger() {
         if !isTyping && currentStepIndex < script.count {
             let nextMsg = script[currentStepIndex]
@@ -157,29 +150,25 @@ class ChatViewModel: ObservableObject {
             }
         }
     }
-    
-    // MARK: - Sugerencias Inteligentes
+
     func updateSuggestion(for inputText: String) {
-        // Verificar si el siguiente mensaje requiere trigger manual
         guard currentStepIndex < script.count else {
             hideSuggestion()
             return
         }
-        
+
         let nextMsg = script[currentStepIndex]
-        
-        // SOLO mostrar sugerencia si es un mensaje del usuario que NO se envía automáticamente
+
         guard nextMsg.isCurrentUser && !nextMsg.shouldAutoSend else {
             hideSuggestion()
             return
         }
-        
-        // Resetear si el texto está vacío
+
         guard !inputText.isEmpty else {
             hideSuggestion()
             return
         }
-        
+
         let nextMessage = nextMsg.contentText
         guard !nextMessage.isEmpty else {
             hideSuggestion()
@@ -191,48 +180,41 @@ class ChatViewModel: ObservableObject {
             showSuggestion = true
         }
     }
-    
+
     private func hideSuggestion() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             showSuggestion = false
             currentSuggestion = nil
         }
     }
-    
-    /// Aplica la sugerencia y ejecuta el trigger automático
+
     func applySuggestionAndSend() {
-        // Ocultar la sugerencia primero
         hideSuggestion()
-        
-        // Ejecutar el manual trigger para procesar el mensaje
+
         manualTrigger()
     }
-    
+
     func handleOptionSelected(_ option: MessageOption) {
         print("Usuario seleccionó: \(option.displayText)")
         print("Estado actual: currentStepIndex=\(currentStepIndex), totalMessages=\(messages.count)")
-        
-        // Buscar el último mensaje con opciones y remover las opciones
+
         if let lastMessageWithOptionsIndex = messages.lastIndex(where: { $0.options != nil && !($0.options?.isEmpty ?? true) }) {
             let originalMessage = messages[lastMessageWithOptionsIndex]
-            // Crear un nuevo mensaje sin opciones
             let messageWithoutOptions = UIMessage(
                 text: originalMessage.text,
                 isCurrentUser: originalMessage.isCurrentUser,
                 timestamp: originalMessage.timestamp,
                 imageURL: originalMessage.imageURL,
-                options: nil // Removemos las opciones
+                options: nil
             )
-            
+
             withAnimation {
                 messages[lastMessageWithOptionsIndex] = messageWithoutOptions
             }
         }
-        
-        // Agregar la opción seleccionada como mensaje del usuario
+
         addMessage(option.displayText, isCurrentUser: true)
-        
-        // Saltar el siguiente mensaje del script si es del usuario
+
         if currentStepIndex < script.count {
             let nextMsg = script[currentStepIndex]
             if nextMsg.isCurrentUser {
@@ -240,19 +222,16 @@ class ChatViewModel: ObservableObject {
                 currentStepIndex += 1
             }
         }
-        
+
         print("Esperando 0.8s antes de reanudar flujo...")
-        
-        // Esperar un momento antes de continuar con el siguiente mensaje automático
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
             guard let self = self else { return }
-            
+
             print("Reanudando flujo del chat después del delay...")
-            
-            // Ahora sí, reanudar el flujo
+
             self.waitingForUserSelection = false
-            
-            // Verificar que tenemos mensajes pendientes
+
             if self.currentStepIndex < self.script.count {
                 print("Continuando con mensaje \(self.currentStepIndex + 1)/\(self.script.count)")
                 self.checkNextStep()
@@ -261,22 +240,21 @@ class ChatViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func checkNextStep() {
         guard currentStepIndex < script.count else {
             print("Chat completado. No hay más mensajes.")
             return
         }
-        
-        // Si estamos esperando que el usuario seleccione una opción, no continuar
+
         if waitingForUserSelection {
             print("Esperando selección del usuario...")
             return
         }
-        
+
         let nextMsg = script[currentStepIndex]
         print("Verificando paso \(currentStepIndex + 1)/\(script.count): sender=\(nextMsg.sender ?? "unknown"), auto=\(nextMsg.shouldAutoSend)")
-        
+
         if nextMsg.shouldAutoSend {
             let delay = nextMsg.isCurrentUser ? 0.5 : 1.0
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
@@ -286,28 +264,45 @@ class ChatViewModel: ObservableObject {
             print("Mensaje no automático. Esperando trigger manual.")
         }
     }
-    
+
     private func processNextMessage() {
         guard currentStepIndex < script.count else {
             return
         }
-        
+
         let step = script[currentStepIndex]
         currentStepIndex += 1
-        
+
         if step.isCurrentUser {
-            addMessage(step.contentText, isCurrentUser: true, imageURL: step.imageURL, options: step.options)
+            addMessage(step.contentText, isCurrentUser: true, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime)
             checkNextStep()
         } else {
-            triggerFakeResponse(text: step.contentText, imageURL: step.imageURL, options: step.options)
+            triggerFakeResponse(text: step.contentText, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime)
         }
     }
-    
-    private func addMessage(_ text: String, isCurrentUser: Bool, imageURL: String? = nil, options: [MessageOption]? = nil) {
+
+    private static func timestamp(from sendTime: String?) -> Date {
+        guard let raw = sendTime?.trimmingCharacters(in: .whitespaces), !raw.isEmpty else { return Date() }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        for format in ["h:mm a", "h:mma", "HH:mm", "H:mm"] {
+            formatter.dateFormat = format
+            if let parsed = formatter.date(from: raw) {
+                let calendar = Calendar.current
+                let hm = calendar.dateComponents([.hour, .minute], from: parsed)
+                if let today = calendar.date(bySettingHour: hm.hour ?? 0, minute: hm.minute ?? 0, second: 0, of: Date()) {
+                    return today
+                }
+            }
+        }
+        return Date()
+    }
+
+    private func addMessage(_ text: String, isCurrentUser: Bool, imageURL: String? = nil, options: [MessageOption]? = nil, sendTime: String? = nil) {
         let newMessage = UIMessage(
             text: text,
             isCurrentUser: isCurrentUser,
-            timestamp: Date(),
+            timestamp: Self.timestamp(from: sendTime),
             imageURL: imageURL,
             options: options
         )
@@ -321,72 +316,63 @@ class ChatViewModel: ObservableObject {
             impact.impactOccurred()
         }
     }
-    
-    private func triggerFakeResponse(text: String, imageURL: String? = nil, options: [MessageOption]? = nil) {
+
+    private func triggerFakeResponse(text: String, imageURL: String? = nil, options: [MessageOption]? = nil, sendTime: String? = nil) {
         withAnimation { self.isTyping = true }
-        self.contactStatus = "escribiendo..."
+        self.contactStatus = "typing…"
 
         let typingDuration = min(Double(text.count) * 0.05, 2.5)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + typingDuration) { [weak self] in
             guard let self = self else { return }
-            
-            self.addMessage(text, isCurrentUser: false, imageURL: imageURL, options: options)
-            withAnimation { self.isTyping = false }
-            self.contactStatus = "en línea"
 
-            // Si el mensaje tiene opciones, pausar el flujo
+            self.addMessage(text, isCurrentUser: false, imageURL: imageURL, options: options, sendTime: sendTime)
+            withAnimation { self.isTyping = false }
+            self.contactStatus = "online"
+
             if let options = options, !options.isEmpty {
                 self.waitingForUserSelection = true
                 return
             }
 
-            // Pequeño delay antes del siguiente paso
             DispatchQueue.main.asyncAfter(deadline: .now() + self.transcriptSpeed) { [weak self] in
                 self?.checkNextStep()
             }
         }
     }
-    
+
     func resetChat() {
         messages = []
         isTyping = false
         isLoading = false
         errorMessage = nil
 
-        chatTitle = "Cargando..."
-        contactName = "Contacto"
-        contactStatus = "conectando..."
+        chatTitle = "Loading…"
+        contactName = "Contact"
+        contactStatus = "connecting…"
         contactAvatarURL = nil
+        chatURL = nil
+        isVerified = false
+        isLogoAvatar = false
 
         script = []
         currentStepIndex = 0
         transcriptSpeed = 0.5
-        waitingForUserSelection = false // Resetear la bandera
-        
-        // Resetear sugerencias
+        waitingForUserSelection = false
+
         currentSuggestion = nil
         showSuggestion = false
     }
 
-    // MARK: - New Method: sendTextMessage
     func sendTextMessage(_ text: String) {
-        // Asegurarse de que el texto no esté vacío antes de enviarlo
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
-        // Añadir el mensaje del usuario al chat
         addMessage(text, isCurrentUser: true)
 
-        // Ocultar cualquier sugerencia activa, ya que el usuario ha ingresado texto manualmente
         hideSuggestion()
 
-        // Después de que el usuario envía un mensaje, podemos querer que el bot
-        // automáticamente verifique el siguiente paso en el script si es un mensaje de envío automático.
-        // Esto permite que el bot reaccione a la entrada del usuario.
-        // Se añade un pequeño retardo para una interacción más natural.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.checkNextStep()
         }
     }
 }
-

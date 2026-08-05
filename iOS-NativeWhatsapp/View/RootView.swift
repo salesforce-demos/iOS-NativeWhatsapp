@@ -1,10 +1,3 @@
-//
-//  RootView.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 13/02/26.
-//
-
 import Foundation
 import SwiftUI
 
@@ -17,7 +10,6 @@ struct iPhoneSimulatorRoot: View {
 
     @State private var screenHeight: CGFloat = 852
 
-    // progress: 0 = lockscreen en reposo, 1 = completamente desbloqueado
     var progress: Double {
         let p = -lockScreenOffset / screenHeight
         return max(0, min(p, 1))
@@ -34,7 +26,6 @@ struct iPhoneSimulatorRoot: View {
                     .transition(.opacity)
                     .zIndex(2)
                 } else {
-                    // App principal — visible solo durante la animación de desbloqueo
                     WhatsAppMainView(isLocked: $isLocked, onLockAction: { lockPhone() })
                         .blur(radius: isLocked ? (1.0 - progress) * 4 : 0)
                         .opacity(isLocked && progress < 0.01 ? 0 : 1)
@@ -42,7 +33,6 @@ struct iPhoneSimulatorRoot: View {
                         .zIndex(0)
                         .statusBarHidden(true)
 
-                    // Lockscreen — ocupa toda la pantalla, se desliza hacia arriba al desbloquear
                     if isLocked {
                         LockScreenView(
                             viewModel: lockVM,
@@ -51,7 +41,6 @@ struct iPhoneSimulatorRoot: View {
                         )
                         .frame(width: geo.size.width, height: geo.size.height)
                         .offset(y: lockScreenOffset)
-                        // Corner radius aparece solo al arrastrar
                         .clipShape(
                             RoundedRectangle(
                                 cornerRadius: progress > 0.01 ? pow(progress, 0.35) * 48 : 0,

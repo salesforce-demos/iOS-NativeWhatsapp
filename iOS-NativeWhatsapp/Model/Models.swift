@@ -1,34 +1,20 @@
-//
-//  Models.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 13/02/26.
-//
-
 import Foundation
 
-// MARK: - Root Model
-// Nueva estructura: { "chats": [ { "chatConfig": {...} }, ... ] }
-// Compatible también con el formato legacy { "einsteinChat": {...} }
 struct RootConfig: Codable {
     let chats: [ChatScenario]?
 
-    // Legacy keys por compatibilidad con JSONs viejos en servidor
     let einsteinChat: ChatScenario?
     let secondChat: ChatScenario?
     let serviceChat: ChatScenario?
 
-    /// Devuelve la lista de chats sin importar el formato del JSON
     var allChats: [ChatScenario] {
         if let chats = chats, !chats.isEmpty {
             return chats
         }
-        // Fallback: construir array desde claves legacy
         return [einsteinChat, secondChat, serviceChat].compactMap { $0 }
     }
 }
 
-// MARK: - Scenario & Config
 struct ChatScenario: Codable {
     let chatConfig: ChatConfig
 }
@@ -39,6 +25,17 @@ struct ChatConfig: Codable {
     let contactFirstName: String?
     let agentImageURL: String?
     let contactImageURL: String?
+
+    let chatURL: String?
+    let contactStatus: String?
+
+    let lastMessage: String?
+    let lastMessageTime: String?
+    let unreadCount: Int?
+    let isGroup: Bool?
+    let isVerified: Bool?
+    let avatarStyle: String?
+
     let botImageURL: String?
     let otherImageURL: String?
     let botName: String?
@@ -51,12 +48,11 @@ struct ChatConfig: Codable {
     let startFromBottom: Bool?
     let statusBar: StatusBarConfig?
     let notifications: [NotificationConfig]?
-    let nbaItems: [String]? // Array vacío por ahora
-    let einsteinReplyItems: [String]? // Array vacío por ahora
+    let nbaItems: [String]?
+    let einsteinReplyItems: [String]?
     let messagesFilteredByDate: [DailyMessages]?
 }
 
-// MARK: - StatusBar Config
 struct StatusBarConfig: Codable {
     let lockscreen: StatusBarSettings?
     let chatview: StatusBarSettings?
@@ -71,7 +67,6 @@ struct StatusBarSettings: Codable {
     let isCharging: Bool?
 }
 
-// MARK: - Notification Config
 struct NotificationConfig: Codable, Identifiable {
     let id: UUID
     let appName: String?
@@ -80,13 +75,11 @@ struct NotificationConfig: Codable, Identifiable {
     let title: String?
     let message: String?
     let timeAgo: String?
-    
-    // CodingKeys para excluir 'id' del JSON
+
     enum CodingKeys: String, CodingKey {
         case appName, iconName, iconColor, title, message, timeAgo
     }
-    
-    // Decoder personalizado para generar el ID
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = UUID()
@@ -97,8 +90,7 @@ struct NotificationConfig: Codable, Identifiable {
         self.message = try container.decodeIfPresent(String.self, forKey: .message)
         self.timeAgo = try container.decodeIfPresent(String.self, forKey: .timeAgo)
     }
-    
-    // Encoder personalizado
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(appName, forKey: .appName)
@@ -116,10 +108,9 @@ struct DailyMessages: Codable {
     let shown: Bool?
 }
 
-// MARK: - Message Model
 struct JSONMessage: Codable, Identifiable {
-    var id: UUID { UUID() } // Generado localmente
-    
+    var id: UUID { UUID() }
+
     let replaceByNextMessage: Bool?
     let component: String?
     let day: String?
@@ -129,48 +120,45 @@ struct JSONMessage: Codable, Identifiable {
     let messageShown: Bool?
     let order: Int?
     let text: String?
-    let sendAutimatically: Bool? // Nota: en el JSON dice "sendAutimatically"
-    let sender: String? // "Agent", "Customer", "Bot"
+    let sendAutimatically: Bool?
+    let sender: String?
     let options: [MessageOption]?
     let actions: [MessageAction]?
-    
-    // Helpers
+
     var isCurrentUser: Bool {
         return sender == "Customer"
     }
-    
+
     var contentText: String {
         return text ?? ""
     }
-    
+
     var shouldAutoSend: Bool {
         return sendAutimatically ?? false
     }
-    
+
     var hasOptions: Bool {
         return !(options?.isEmpty ?? true)
     }
-    
+
     var hasActions: Bool {
         return !(actions?.isEmpty ?? true)
     }
 }
 
-// MARK: - Message Options (para las opciones seleccionables)
 struct MessageOption: Codable, Identifiable, Equatable {
     var id: UUID { UUID() }
-    
+
     let text: String?
     let order: Int?
     let imageURL: String?
     let isSelectable: Bool?
     let selected: Bool?
-    
+
     var displayText: String {
         return text ?? ""
     }
-    
-    // Conformidad a Equatable (comparación sin el id)
+
     static func == (lhs: MessageOption, rhs: MessageOption) -> Bool {
         return lhs.text == rhs.text &&
                lhs.order == rhs.order &&
@@ -180,17 +168,15 @@ struct MessageOption: Codable, Identifiable, Equatable {
     }
 }
 
-// MARK: - Message Actions
 struct MessageAction: Codable, Identifiable, Equatable {
     var id: UUID { UUID() }
-    
+
     let name: String?
     let delayMS: Int?
-    let actionType: String? // "Send Chat Item", etc.
+    let actionType: String?
     let parameter: String?
     let showSpinner: Bool?
-    
-    // Conformidad a Equatable (comparación sin el id)
+
     static func == (lhs: MessageAction, rhs: MessageAction) -> Bool {
         return lhs.name == rhs.name &&
                lhs.delayMS == rhs.delayMS &&
@@ -200,7 +186,6 @@ struct MessageAction: Codable, Identifiable, Equatable {
     }
 }
 
-// Modelo interno para la UI del Chat
 struct UIMessage: Identifiable, Equatable {
     let id = UUID()
     let text: String
@@ -208,8 +193,7 @@ struct UIMessage: Identifiable, Equatable {
     let timestamp: Date
     let imageURL: String?
     let options: [MessageOption]?
-    
-    // Inicializador con valores por defecto
+
     init(text: String, isCurrentUser: Bool, timestamp: Date = Date(), imageURL: String? = nil, options: [MessageOption]? = nil) {
         self.text = text
         self.isCurrentUser = isCurrentUser
@@ -217,8 +201,7 @@ struct UIMessage: Identifiable, Equatable {
         self.imageURL = imageURL
         self.options = options
     }
-    
-    // Conformidad a Equatable (comparación sin el id)
+
     static func == (lhs: UIMessage, rhs: UIMessage) -> Bool {
         return lhs.text == rhs.text &&
                lhs.isCurrentUser == rhs.isCurrentUser &&

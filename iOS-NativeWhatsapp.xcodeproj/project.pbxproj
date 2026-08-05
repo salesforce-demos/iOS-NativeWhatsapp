@@ -24,10 +24,10 @@
 		629B50BF2F476019004DA746 /* NotificationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 629B50BE2F476019004DA746 /* NotificationCardView.swift */; };
 		629B50C12F4CA96A004DA746 /* ChatHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 629B50C02F4CA96A004DA746 /* ChatHeaderView.swift */; };
 		62B84DB52F61C3DE00045C3D /* URLConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B84DB42F61C3DE00045C3D /* URLConfigurationView.swift */; };
-		62B84DC72F61F50900045C3D /* chatConfigs2.json in Resources */ = {isa = PBXBuildFile; fileRef = 62B84DC62F61F50900045C3D /* chatConfigs2.json */; };
 		62B84DD12F62525F00045C3D /* chatConfigs.json in Resources */ = {isa = PBXBuildFile; fileRef = 62B84DD02F62525F00045C3D /* chatConfigs.json */; };
 		62C39D8A2F8E979D00838715 /* ChatsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C39D892F8E979C00838715 /* ChatsListViewModel.swift */; };
 		62EDC33D2F8849720081E29A /* WhatsAppMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EDC33C2F8849720081E29A /* WhatsAppMainView.swift */; };
+		62F1A0022F9000020000AAA2 /* ChatWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F1A0012F9000010000AAA1 /* ChatWebView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,10 +49,10 @@
 		629B50BE2F476019004DA746 /* NotificationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCardView.swift; sourceTree = "<group>"; };
 		629B50C02F4CA96A004DA746 /* ChatHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHeaderView.swift; sourceTree = "<group>"; };
 		62B84DB42F61C3DE00045C3D /* URLConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConfigurationView.swift; sourceTree = "<group>"; };
-		62B84DC62F61F50900045C3D /* chatConfigs2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = chatConfigs2.json; sourceTree = "<group>"; };
 		62B84DD02F62525F00045C3D /* chatConfigs.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = chatConfigs.json; sourceTree = "<group>"; };
 		62C39D892F8E979C00838715 /* ChatsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatsListViewModel.swift; sourceTree = "<group>"; };
 		62EDC33C2F8849720081E29A /* WhatsAppMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsAppMainView.swift; sourceTree = "<group>"; };
+		62F1A0012F9000010000AAA1 /* ChatWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatWebView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -121,7 +121,6 @@
 			children = (
 				18E24B352F3F7AC0007B6764 /* ChatViewModel.swift */,
 				18E24B372F3F7AD7007B6764 /* LockScreenViewModel.swift */,
-				62B84DC62F61F50900045C3D /* chatConfigs2.json */,
 				62B84DD02F62525F00045C3D /* chatConfigs.json */,
 				62C39D892F8E979C00838715 /* ChatsListViewModel.swift */,
 			);
@@ -146,6 +145,7 @@
 			children = (
 				6222B2752F5632E2005B2E2B /* StatusBar */,
 				629B50C02F4CA96A004DA746 /* ChatHeaderView.swift */,
+				62F1A0012F9000010000AAA1 /* ChatWebView.swift */,
 				629B50BE2F476019004DA746 /* NotificationCardView.swift */,
 				62065A5D2F71DD890033433B /* TextPathGlyph.swift */,
 				629B50AE2F44BF61004DA746 /* LockScreenButton.swift */,
@@ -219,7 +219,6 @@
 				18E24B292F3F7A21007B6764 /* Preview Assets.xcassets in Resources */,
 				62B84DD12F62525F00045C3D /* chatConfigs.json in Resources */,
 				18E24B262F3F7A21007B6764 /* Assets.xcassets in Resources */,
-				62B84DC72F61F50900045C3D /* chatConfigs2.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,6 +236,7 @@
 				62EDC33D2F8849720081E29A /* WhatsAppMainView.swift in Sources */,
 				18E24B3B2F3F7AFD007B6764 /* ComponentsChat.swift in Sources */,
 				629B50C12F4CA96A004DA746 /* ChatHeaderView.swift in Sources */,
+				62F1A0022F9000020000AAA2 /* ChatWebView.swift in Sources */,
 				62065A5E2F71DD890033433B /* TextPathGlyph.swift in Sources */,
 				18E24B412F3F7B42007B6764 /* RootView.swift in Sources */,
 				62C39D8A2F8E979D00838715 /* ChatsListViewModel.swift in Sources */,
@@ -378,10 +378,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS-NativeWhatsapp/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4WQ2T93P22;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Whatsapp;
@@ -395,7 +395,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.saleforce.iOS-NativeWhatsapp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -411,10 +411,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS-NativeWhatsapp/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4WQ2T93P22;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Whatsapp;
@@ -428,7 +428,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.saleforce.iOS-NativeWhatsapp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

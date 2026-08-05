@@ -1,8 +1,3 @@
-//
-//  ChatsListViewModel.swift
-//  NotificationLiquidGlass
-//
-
 import SwiftUI
 
 class ChatsListViewModel: ObservableObject {
@@ -28,15 +23,27 @@ class ChatsListViewModel: ObservableObject {
         }
     }
 
-    /// Texto del último mensaje para mostrar en la fila
     func lastMessagePreview(for config: ChatConfig) -> String {
+        if let text = config.lastMessage, !text.isEmpty { return text }
         let messages = config.messagesFilteredByDate?.flatMap { $0.messages ?? [] } ?? []
         return messages.last?.text ?? ""
     }
 
-    /// Hora del último mensaje
     func lastMessageTime(for config: ChatConfig) -> String {
+        if let time = config.lastMessageTime, !time.isEmpty { return time }
         let messages = config.messagesFilteredByDate?.flatMap { $0.messages ?? [] } ?? []
         return messages.last?.sendTime ?? ""
+    }
+
+    func unreadCount(for config: ChatConfig) -> Int {
+        max(0, config.unreadCount ?? 0)
+    }
+
+    var unreadChats: Int {
+        chatScenarios.filter { ($0.chatConfig.unreadCount ?? 0) > 0 }.count
+    }
+
+    var groupChats: Int {
+        chatScenarios.filter { $0.chatConfig.isGroup == true }.count
     }
 }

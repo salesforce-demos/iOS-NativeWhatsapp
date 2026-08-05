@@ -1,14 +1,5 @@
-//
-//  StatusBar.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 2/03/26.
-//
-
-
 import SwiftUI
 
-// MARK: - StatusBar View
 struct StatusBar: View {
     var carrier: String = "T-Mobile"
     var signalBars: Int = 4
@@ -25,14 +16,25 @@ struct StatusBar: View {
         foregroundColor ?? (colorScheme == .dark ? .white : .black)
     }
 
+    private var timeString: String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm"
+        return f.string(from: Date())
+    }
+
     var body: some View {
         HStack(alignment: .center) {
             if !isLockScreen {
-                HStack(spacing: 4) {
-                    Spacer().frame(width: 15)
-                    Text(carrier)
-                        .font(.system(size: 15, weight: .semibold))
-                    CellularSignalView(bars: signalBars, color: resolvedColor)
+                HStack(spacing: 6) {
+                    Spacer().frame(width: 24)
+                    TimelineView(.everyMinute) { _ in
+                        Text(timeString)
+                            .font(.system(size: 17, weight: .semibold))
+                            .monospacedDigit()
+                    }
+                    Image(systemName: "bell.slash.fill")
+                        .font(.system(size: 14))
                 }
                 Spacer()
             } else {
@@ -45,9 +47,7 @@ struct StatusBar: View {
             }
 
             HStack {
-                if isLockScreen {
-                    CellularSignalView(bars: signalBars, color: resolvedColor)
-                }
+                CellularSignalView(bars: signalBars, color: resolvedColor)
                 if showWifi {
                     WifiSignalView(strength: wifiStrength)
                 }
@@ -61,10 +61,8 @@ struct StatusBar: View {
     }
 }
 
-
-// MARK: - Cellular Signal
 struct CellularSignalView: View {
-    var bars: Int  // 0-4
+    var bars: Int
     var color: Color
 
     var body: some View {
@@ -79,10 +77,8 @@ struct CellularSignalView: View {
     }
 }
 
-
-// MARK: - Battery
 struct BatteryView: View {
-    var level: CGFloat = 0.8    // 0.0 ... 1.0
+    var level: CGFloat = 0.8
     var isCharging: Bool = false
     var color: Color
 
@@ -102,12 +98,10 @@ struct BatteryView: View {
     var body: some View {
         HStack(spacing: 1) {
             ZStack(alignment: .leading) {
-                // Outline
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(color.opacity(isCharging ? 0.4 : 1), lineWidth: 1.2)
                     .frame(width: bodyWidth, height: bodyHeight)
 
-                // Fill bar
                 RoundedRectangle(cornerRadius: cornerRadius - 1)
                     .fill(fillColor)
                     .frame(
@@ -116,13 +110,11 @@ struct BatteryView: View {
                     )
                     .padding(.leading, inset)
 
-                // Bolt icon when charging — split contrast
                 if isCharging {
                     boltView
                 }
             }
 
-            // Battery pin (nub)
             RoundedRectangle(cornerRadius: 1)
                 .fill(color.opacity(isCharging ? 0.4 : 1))
                 .frame(width: pinWidth, height: pinHeight)
@@ -133,18 +125,15 @@ struct BatteryView: View {
         max(0, min(level, 1))
     }
 
-    /// Bolt with split color: black over the green fill, green beyond it
     private var boltView: some View {
         let fillWidth = (bodyWidth - inset * 2) * clampedLevel + inset
 
         return ZStack {
-            // Green bolt (full) — visible beyond the fill
             Image(systemName: "bolt.fill")
                 .font(.system(size: 9, weight: .bold))
                 .foregroundColor(.green)
                 .frame(width: bodyWidth, height: bodyHeight)
 
-            // Black bolt clipped to the fill area
             Image(systemName: "bolt.fill")
                 .font(.system(size: 9, weight: .bold))
                 .foregroundColor(.black.opacity(0.4))
@@ -158,11 +147,8 @@ struct BatteryView: View {
     }
 }
 
-
-
-// MARK: Wifi Signal
 struct WifiSignalView: View {
-    var strength: Int  // 0-3
+    var strength: Int
 
     private let size: CGFloat = 15
 
@@ -170,7 +156,6 @@ struct WifiSignalView: View {
         Canvas { ctx, canvasSize in
             let center = CGPoint(x: canvasSize.width / 2, y: canvasSize.height - 1)
 
-            // iOS WiFi fan: ~44° spread each side from vertical
             let startAngle = Angle.degrees(225)
             let endAngle = Angle.degrees(315)
             let lineWidth: CGFloat = 2.8
@@ -185,7 +170,6 @@ struct WifiSignalView: View {
                 ctx.opacity = 1.0
             }
 
-            // Bottom dot (filled circle)
             let dotRadius: CGFloat = 1.8
             let dotRect = CGRect(
                 x: center.x - dotRadius,
@@ -208,7 +192,6 @@ struct WifiSignalView: View {
     }
 }
 
-// MARK: - Preview
 #Preview {
     VStack(spacing: 0) {
         StatusBar(carrier: "CLARO", signalBars: 2, wifiStrength: 3, levelBattery: 0.3, isCharging: false)
@@ -230,4 +213,3 @@ struct WifiSignalView: View {
             .background(Color(UIColor.systemGray5))
     }
 }
-

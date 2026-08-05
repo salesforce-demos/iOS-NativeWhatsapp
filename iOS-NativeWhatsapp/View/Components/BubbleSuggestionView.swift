@@ -1,10 +1,3 @@
-//
-//  BubbleSuggestionView.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 05/03/26.
-//
-
 import SwiftUI
 
 struct BubbleSuggestionView: View {
@@ -61,7 +54,6 @@ struct BubbleSuggestionView: View {
     }
 }
 
-// MARK: - Preview
 #Preview("Bubble Suggestion") {
     ZStack {
         Color(red: 0.937, green: 0.937, blue: 0.937).ignoresSafeArea()

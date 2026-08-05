@@ -1,15 +1,7 @@
-//
-//  LockScreenView.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 13/02/26.
-//
-
 import SwiftUI
 
 @available(iOS 26.0, *)
 struct LockScreenView: View {
-
     @ObservedObject var viewModel: LockScreenViewModel
     @Binding var offset:  CGFloat
     @Binding var opacity: Double
@@ -29,11 +21,11 @@ struct LockScreenView: View {
     private var dateString: String {
         currentTime.formatted(.dateTime.weekday(.wide).day().month()).capitalized
     }
-    
+
     var body: some View {
         ZStack(alignment: .top) {
             content
-            
+
             StatusBar(
                 carrier: viewModel.statusBarLockScreen?.carrier ?? "T-Mobile",
                 signalBars: viewModel.statusBarLockScreen?.signalBars ?? 2,
@@ -55,8 +47,6 @@ struct LockScreenView: View {
 
     var content: some View {
         ZStack {
-
-            // MARK: Wallpaper
             Group {
                if UIImage(named: "iOS26") != nil {
                 Image("iOS26").resizable().scaledToFill()
@@ -70,8 +60,6 @@ struct LockScreenView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-
-                // ── Botón candado
                 Button(action: { viewModel.addNotification() }) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 20))
@@ -82,7 +70,6 @@ struct LockScreenView: View {
                 .padding(.top, 40)
                 .opacity(opacity)
 
-                // Reloj
                 VStack(spacing: -60) {
                     Button(action: { bounceDate(); viewModel.addNotification() }) {
                         Text(dateString)
@@ -108,12 +95,10 @@ struct LockScreenView: View {
                             )
                         )
                         .environment(\.colorScheme, .light)
-                    
                 }
                 .padding(.bottom, 20)
                 .opacity(opacity)
 
-               
                 ScrollView(showsIndicators: false) {
                     GlassEffectContainer(spacing: 10) {
                         VStack(spacing: 10) {
@@ -131,7 +116,6 @@ struct LockScreenView: View {
 
                 Spacer().frame(height: 20)
 
-                // Botones inferiores
                 GlassEffectContainer(spacing: 200) {
                     HStack {
                         Button {
@@ -175,8 +159,7 @@ struct LockScreenView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onReceive(clock) { date in
-            
-            // Align to the start of each second for better precision
+
             let nextSecond = Calendar.current.date(bySetting: .nanosecond, value: 0, of: date) ?? date
             currentTime = nextSecond
         }
@@ -188,7 +171,6 @@ struct LockScreenView: View {
     }
 }
 
- 
 @available(iOS 26.0, *)
 #Preview("Lock Screen") {
     LockScreenView(

@@ -1,16 +1,9 @@
-//
-//  WhatsAppMainView.swift
-//  NotificationLiquidGlass
-//
-
 import SwiftUI
 
-// MARK: - Tab identifiers
 enum WATab: Hashable {
     case updates, calls, communities, chats, you
 }
 
-// MARK: - Main entry with TabView (iOS 26 Liquid Glass tab bar automático)
 struct WhatsAppMainView: View {
     @Binding var isLocked: Bool
     var onLockAction: () -> Void
@@ -19,7 +12,6 @@ struct WhatsAppMainView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-
             Tab("Updates", image: selectedTab == .updates ? "status-fill" : "status", value: WATab.updates) {
                 WAPlaceholderView(title: "Updates")
             }
@@ -46,10 +38,16 @@ struct WhatsAppMainView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .tint(.black)
     }
 }
 
-// MARK: - Chats tab
+private struct WAFilter: Identifiable {
+    let id = UUID()
+    let title: String
+    var count: Int = 0
+}
+
 struct WAChatsView: View {
     @Binding var isLocked: Bool
     var onLockAction: () -> Void
@@ -60,14 +58,23 @@ struct WAChatsView: View {
     @State private var tabBarHidden = false
     @State private var selectedConfig: ChatConfig? = nil
 
-    private let filters = ["All", "Unread", "Favorites", "Groups"]
-    private let waGreen = Color(red: 0.0, green: 0.659, blue: 0.518)
-    private let waGreenDark = Color(red: 0.067, green: 0.475, blue: 0.424)
+    private var filters: [WAFilter] {
+        [
+            WAFilter(title: "All"),
+            WAFilter(title: "Unread", count: listVM.unreadChats),
+            WAFilter(title: "Favorites"),
+            WAFilter(title: "Groups", count: listVM.groupChats)
+        ]
+    }
+
+    private var statusBar: StatusBarSettings? {
+        listVM.chatScenarios.first?.chatConfig.statusBar?.chatview
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemBackground).ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 if listVM.isLoading {
                     ProgressView()
@@ -83,29 +90,31 @@ struct WAChatsView: View {
                     ScrollView {
                         VStack(spacing: 0) {
                             searchBar
-                                .padding(.horizontal, 16)
-                                .padding(.top, 8)
-                                .padding(.bottom, 12)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 1)
+                                .padding(.bottom, 24)
 
                             filterBar
                                 .padding(.bottom, 12)
 
-                            Divider().opacity(0.35)
+                            archivedRow
+
+                            rowDivider
 
                             ForEach(Array(listVM.chatScenarios.enumerated()), id: \.offset) { index, scenario in
                                 chatRow(for: scenario.chatConfig)
+                                    .contentShape(Rectangle())
                                     .onTapGesture {
                                         tabBarHidden = true
                                         selectedConfig = scenario.chatConfig
                                     }
 
-                                Divider().padding(.leading, 76).opacity(0.35)
+                                rowDivider
                             }
                         }
                     }
                 }
 
-                // Navegación al chat seleccionado
                 Color.clear
                     .navigationDestination(isPresented: Binding(
                         get: { selectedConfig != nil },
@@ -115,6 +124,7 @@ struct WAChatsView: View {
                             ChatView(
                                 isLocked: $isLocked,
                                 config: config,
+                                backBadge: listVM.unreadChats > 0 ? "\(listVM.unreadChats)" : nil,
                                 onLockAction: {
                                     tabBarHidden = false
                                     selectedConfig = nil
@@ -126,165 +136,229 @@ struct WAChatsView: View {
                     }
             }
             .navigationTitle("Chats")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar(tabBarHidden ? .hidden : .visible, for: .tabBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { onLockAction() }) {
+                    WAGlassCircleButton(action: { onLockAction() }) {
                         Image(systemName: "ellipsis")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .frame(width: 28, height: 28)
-                            .background(Circle().fill(Color(.systemGray5)))
+                            .font(.system(size: 17))
+                            .foregroundStyle(.black)
                     }
-                    .buttonStyle(.plain)
+                    .padding(.leading, -4)
                 }
+                .sharedBackgroundVisibility(.hidden)
 
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(.primary)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button(action: {
-                        if let first = listVM.chatScenarios.first {
-                            tabBarHidden = true
-                            selectedConfig = first.chatConfig
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 12) {
+                        WAGlassCircleButton(action: {}) {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 17))
+                                .foregroundStyle(.black)
                         }
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 28, height: 28)
-                            .background(Circle().fill(waGreen))
+
+                        WAGlassCircleButton(fill: WA.green, action: {
+                            if let first = listVM.chatScenarios.first {
+                                tabBarHidden = true
+                                selectedConfig = first.chatConfig
+                            }
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
                     }
-                    .buttonStyle(.plain)
+                    .padding(.trailing, -4)
                 }
+                .sharedBackgroundVisibility(.hidden)
+            }
+        }
+        .overlay(alignment: .top) {
+            if selectedConfig == nil {
+                WAStatusBarSlot(
+                    carrier: statusBar?.carrier ?? "Carrier",
+                    signalBars: statusBar?.signalBars ?? 4,
+                    wifiStrength: statusBar?.wifiStrength ?? 3,
+                    showWifi: statusBar?.showWifi ?? true,
+                    levelBattery: statusBar?.levelBattery ?? 0.3,
+                    isCharging: statusBar?.isCharging ?? false
+                )
+                .background(Color.white)
+                .allowsHitTesting(false)
+                .ignoresSafeArea(edges: .top)
             }
         }
         .task { listVM.loadChats() }
     }
 
-    // MARK: Search bar
     private var searchBar: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-                .font(.system(size: 16))
-            TextField("Ask Meta AI or Search", text: $searchText)
-                .font(.system(size: 16))
+                .font(.system(size: 17))
+                .foregroundStyle(WA.secondary)
+
+            TextField(
+                "",
+                text: $searchText,
+                prompt: Text("Ask Meta AI or Search")
+                    .font(.system(size: 17))
+                    .foregroundColor(WA.secondary)
+            )
+            .font(.system(size: 17))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(.leading, 14)
+        .padding(.trailing, 12)
+        .frame(height: 44)
+        .background(Capsule().fill(WA.searchFill))
     }
 
-    // MARK: Filter chips
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(filters, id: \.self) { filter in
+                ForEach(filters) { filter in
                     filterChip(filter)
                 }
+                addFilterChip
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 20)
         }
+        .scrollClipDisabled()
     }
 
-    private func filterChip(_ label: String) -> some View {
-        let isSelected = selectedFilter == label
+    private func filterChip(_ filter: WAFilter) -> some View {
+        let isSelected = selectedFilter == filter.title
         return Button(action: {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
-                selectedFilter = label
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                selectedFilter = filter.title
             }
         }) {
-            Text(label)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(isSelected ? waGreenDark : .primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 7)
+            HStack(spacing: 6) {
+                Text(filter.title)
+                    .font(.system(size: 15))
+                if filter.count > 0 {
+                    Text("\(filter.count)")
+                        .font(.system(size: 13))
+                }
+            }
+            .foregroundStyle(isSelected ? WA.chipText : WA.secondary)
+            .padding(.horizontal, 13)
+            .frame(height: 32)
+            .background(
+                Capsule()
+                    .fill(isSelected ? WA.chipFill : Color.clear)
+                    .overlay(
+                        Capsule().strokeBorder(isSelected ? WA.chipStroke : WA.hairline, lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var addFilterChip: some View {
+        Button(action: {}) {
+            Image(systemName: "plus")
+                .font(.system(size: 16))
+                .foregroundStyle(.black)
+                .frame(width: 35, height: 32)
                 .background(
-                    Capsule()
-                        .fill(isSelected ? waGreen.opacity(0.18) : Color.clear)
-                        .overlay(
-                            Capsule()
-                                .strokeBorder(
-                                    isSelected ? waGreen.opacity(0.5) : Color(.systemGray4),
-                                    lineWidth: 1.2
-                                )
-                        )
+                    Capsule().strokeBorder(WA.hairline, lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: Chat row dinámico
+    private var archivedRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "archivebox")
+                .font(.system(size: 19))
+                .foregroundStyle(WA.secondary)
+                .frame(width: WA.rowAvatarSize)
+
+            Text("Archived")
+                .font(.system(size: 17))
+                .foregroundStyle(.black)
+
+            Spacer()
+        }
+        .padding(.leading, 20)
+        .padding(.trailing, 16)
+        .frame(height: 56)
+        .contentShape(Rectangle())
+    }
+
+    private var rowDivider: some View {
+        Rectangle()
+            .fill(WA.divider)
+            .frame(height: 1)
+            .padding(.leading, WA.rowTextLeading)
+            .padding(.trailing, 16)
+    }
+
     private func chatRow(for config: ChatConfig) -> some View {
         let lastMsg = listVM.lastMessagePreview(for: config)
         let lastTime = listVM.lastMessageTime(for: config)
-        let initial = String(config.contactName.prefix(1).uppercased())
+        let unread = listVM.unreadCount(for: config)
 
-        return HStack(spacing: 14) {
-            // Avatar
-            ZStack {
-                Circle()
-                    .fill(Color(red: 0.067, green: 0.475, blue: 0.424))
-                    .frame(width: 52, height: 52)
-                if let urlStr = config.agentImageURL ?? config.contactImageURL,
-                   let url = URL(string: urlStr) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let img):
-                            img.resizable().scaledToFill()
-                                .frame(width: 52, height: 52)
-                                .clipShape(Circle())
-                        default:
-                            Text(initial)
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                    }
-                } else {
-                    Text(initial)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-            }
+        return HStack(alignment: .top, spacing: 12) {
+            AvatarView(
+                url: URL(string: config.agentImageURL ?? config.contactImageURL ?? ""),
+                text: config.contactName,
+                size: WA.rowAvatarSize,
+                isLogo: (config.avatarStyle ?? "photo").lowercased() == "logo"
+            )
 
-            VStack(alignment: .leading, spacing: 3) {
-                HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(config.contactName)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
-                    Spacer()
-                    Text(lastTime)
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                }
-                HStack {
-                    Text(lastMsg)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.black)
                         .lineLimit(1)
-                    Spacer()
+
+                    if config.isVerified == true {
+                        WAVerifiedBadge(size: 15)
+                    }
+
+                    Spacer(minLength: 4)
+
+                    if !lastTime.isEmpty {
+                        Text(lastTime)
+                            .font(.system(size: 15))
+                            .foregroundStyle(WA.secondary)
+                    }
+                }
+
+                HStack(alignment: .top, spacing: 8) {
+                    Text(lastMsg)
+                        .font(.system(size: 16))
+                        .foregroundStyle(WA.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+
+                    Spacer(minLength: 4)
+
+                    if unread > 0 {
+                        Text("\(unread)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .frame(minWidth: 20, minHeight: 20)
+                            .background(Capsule().fill(WA.green))
+                    }
                 }
             }
+            .padding(.top, 2)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .contentShape(Rectangle())
+        .padding(.leading, 20)
+        .padding(.trailing, 16)
+        .padding(.vertical, 10)
     }
 }
 
-// MARK: - Placeholder para tabs sin contenido
 struct WAPlaceholderView: View {
     let title: String
     var body: some View {
         NavigationStack {
-            Color(.systemBackground)
+            Color.white
                 .ignoresSafeArea()
                 .overlay(
                     Text(title)
@@ -297,7 +371,6 @@ struct WAPlaceholderView: View {
     }
 }
 
-// MARK: - Preview
 #Preview("WhatsAppMainView") {
     WhatsAppMainView(isLocked: .constant(false), onLockAction: {})
 }

@@ -1,21 +1,23 @@
 import SwiftUI
 
 struct ChatView: View {
-
     @Binding var isLocked: Bool
     var onLockAction: () -> Void
 
     @StateObject private var vm: ChatViewModel
     @StateObject private var keyboard = KeyboardObserver()
+    @StateObject private var web = ChatWebController()
     @State private var inputText = ""
     @State private var currentTime = Date()
     @FocusState private var isInputFocused: Bool
 
     private let hasInjectedConfig: Bool
+    var backBadge: String? = nil
 
-    init(isLocked: Binding<Bool>, config: ChatConfig? = nil, onLockAction: @escaping () -> Void) {
+    init(isLocked: Binding<Bool>, config: ChatConfig? = nil, backBadge: String? = nil, onLockAction: @escaping () -> Void) {
         self._isLocked = isLocked
         self.onLockAction = onLockAction
+        self.backBadge = backBadge
         if let config = config {
             self._vm = StateObject(wrappedValue: ChatViewModel(config: config))
             self.hasInjectedConfig = true
@@ -25,42 +27,39 @@ struct ChatView: View {
         }
     }
 
-    private let inputRowHeight: CGFloat = 60
+    private let inputRowHeight: CGFloat = WA.inputRowHeight
     private let suggestionHeight: CGFloat = 100
     private let extraBottomPadding: CGFloat = 16
-    private let headerHeight: CGFloat = 70 + 44
+    private let headerHeight: CGFloat = WA.headerHeight
 
     var body: some View {
         ZStack(alignment: .top) {
             chatContent
 
-            StatusBar(
+            WAStatusBarSlot(
                 carrier: vm.statusBarChatView?.carrier ?? "Carrier",
                 signalBars: vm.statusBarChatView?.signalBars ?? 4,
                 wifiStrength: vm.statusBarChatView?.wifiStrength ?? 3,
                 showWifi: vm.statusBarChatView?.showWifi ?? true,
-                foregroundColor: nil,
-                isLockScreen: false,
                 levelBattery: vm.statusBarChatView?.levelBattery ?? 0.3,
                 isCharging: vm.statusBarChatView?.isCharging ?? false
             )
-            .frame(height: 70)
-            .background(Color(red: 244/255, green: 240/255, blue: 236/255))
+            .background(WA.chrome)
         }
         .ignoresSafeArea(edges: .top)
     }
 }
 
 private extension ChatView {
-
     var chatContent: some View {
         GeometryReader { geo in
             ZStack(alignment: .top) {
-
-                Color(.systemBackground).ignoresSafeArea()
+                WAChatWallpaper(dimmed: vm.chatURL == nil)
 
                 if let error = vm.errorMessage {
                     errorView(error)
+                } else if let url = vm.chatURL {
+                    webChat(url: url, geo: geo)
                 } else {
                     messageList(geo: geo)
                 }
@@ -107,66 +106,64 @@ private extension ChatView {
     }
 
     var chatHeader: some View {
-        VStack(spacing: 0) {
-            Color(red: 244/255, green: 240/255, blue: 236/255).frame(height: 70)
-
-            HStack(spacing: 10) {
-                Button(action: {
-                    isInputFocused = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        onLockAction()
-                    }
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.primary)
+        ChatHeaderView(
+            title: vm.contactName,
+            subtitle: vm.contactStatus,
+            avatarURL: vm.contactAvatarURL,
+            backBadge: backBadge,
+            isVerified: vm.isVerified,
+            isLogoAvatar: vm.isLogoAvatar,
+            onBack: {
+                isInputFocused = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    onLockAction()
                 }
-                .buttonStyle(.plain)
-
-                Button(action: { vm.manualTrigger() }) {
-                    HStack(spacing: 8) {
-                        AvatarView(
-                            url: vm.contactAvatarURL,
-                            text: vm.contactName.isEmpty ? "?" : vm.contactName,
-                            size: 36
-                        )
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(vm.contactName.isEmpty ? "Contacto" : vm.contactName)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
-                            Text("online")
-                                .font(.system(size: 12))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-
-                Spacer()
-
-                HStack(spacing: 16) {
-                    Button(action: { UIImpactFeedbackGenerator(style: .light).impactOccurred() }) {
-                        Image(systemName: "video")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.primary)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button(action: { UIImpactFeedbackGenerator(style: .light).impactOccurred() }) {
-                        Image(systemName: "phone")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.primary)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.trailing, 4)
-            }
-            .padding(.horizontal, 14)
-            .frame(height: 44)
-            .background(Color(red: 244/255, green: 240/255, blue: 236/255))
-        }
+            },
+            onTitleTap: { advanceConversation() },
+            onVideoCall: { UIImpactFeedbackGenerator(style: .light).impactOccurred() },
+            onVoiceCall: { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+        )
         .ignoresSafeArea(edges: .top)
+    }
+
+    func webChat(url: URL, geo: GeometryProxy) -> some View {
+        ZStack(alignment: .top) {
+            ChatWebView(url: url, controller: web)
+
+            if let error = web.lastError {
+                VStack(spacing: 10) {
+                    Image(systemName: "wifi.exclamationmark")
+                        .font(.system(size: 28))
+                        .foregroundStyle(WA.secondary)
+                    Text(error)
+                        .font(.system(size: 14))
+                        .foregroundStyle(WA.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Retry") { web.reload() }
+                        .font(.system(size: 15, weight: .semibold))
+                        .tint(WA.green)
+                }
+                .padding(24)
+            } else if web.isLoading {
+                ProgressView().tint(WA.secondary)
+            }
+
+            WADateSeparator(text: formattedDay(for: Date()))
+                .padding(.top, headerHeight + 10)
+                .allowsHitTesting(false)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.bottom, webBottomInset(safeBottom: geo.safeAreaInsets.bottom))
+        .onAppear {
+            web.dayLabel = formattedDay(for: Date())
+            web.topInsetPoints = headerHeight
+        }
+        .onChange(of: keyboard.height) { oldHeight, newHeight in
+            if newHeight > oldHeight { web.scrollToBottom() }
+        }
+        .onChange(of: isInputFocused) { _, focused in
+            if focused { web.scrollToBottom() }
+        }
     }
 
     func errorView(_ error: String) -> some View {
@@ -178,7 +175,7 @@ private extension ChatView {
             Text(error)
                 .multilineTextAlignment(.center)
                 .padding()
-            Button("Reintentar") { vm.loadData() }
+            Button("Retry") { vm.loadData() }
             Spacer()
         }
     }
@@ -187,12 +184,14 @@ private extension ChatView {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 2) {
+                    WADateSeparator(text: formattedDay(for: vm.messages.first?.timestamp ?? Date()))
+                        .padding(.top, 34)
+                    WAEncryptionNotice()
+                        .padding(.bottom, 8)
+
                     ForEach(Array(vm.messages.enumerated()), id: \.element.id) { index, msg in
-                        if shouldShowTimestamp(at: index) {
-                            Text(formattedTimestamp(for: msg.timestamp))
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity)
+                        if index > 0, shouldShowDaySeparator(at: index) {
+                            WADateSeparator(text: formattedDay(for: msg.timestamp))
                                 .padding(.vertical, 8)
                         }
 
@@ -209,15 +208,6 @@ private extension ChatView {
                 }
             }
             .scrollDismissesKeyboard(.interactively)
-            .background {
-                if UIImage(named: "fondoWhatsapp") != nil {
-                    Image("fondoWhatsapp")
-                        .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea()
-                        .opacity(0.6)
-                }
-            }
             .safeAreaInset(edge: .top, spacing: 0) {
                 Color.clear.frame(height: headerHeight)
             }
@@ -268,14 +258,28 @@ private extension ChatView {
                 )
             }
 
-            HStack(alignment: .bottom, spacing: 8) {
+            HStack(alignment: .bottom, spacing: 0) {
                 plusButton
+                    .padding(.leading, 5)
+
                 textField
+                    .padding(.leading, 6)
+
+                if hasText {
+                    sendButton
+                        .padding(.leading, 10)
+                } else {
+                    cameraButton
+                        .padding(.leading, 12)
+                    micButton
+                        .padding(.leading, 4)
+                }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.trailing, 7)
+            .padding(.vertical, 9)
+            .animation(.easeOut(duration: 0.15), value: hasText)
         }
-        .background(Color(red: 244/255, green: 240/255, blue: 236/255).ignoresSafeArea(edges: .bottom))
+        .background(WA.chrome.ignoresSafeArea(edges: .bottom))
         .compositingGroup()
         .onAppear {
             if !isLocked {
@@ -293,75 +297,109 @@ private extension ChatView {
     var plusButton: some View {
         Button(action: {}) {
             Image(systemName: "plus")
-                .font(.system(size: 24, weight: .regular))
-                .foregroundStyle(.primary)
-                .frame(width: 36, height: 36)
+                .font(.system(size: 25, weight: .regular))
+                .foregroundStyle(.black)
+                .frame(width: 36, height: WA.inputFieldHeight)
         }
         .buttonStyle(.plain)
     }
 
     var textField: some View {
-        HStack(alignment: .bottom, spacing: 6) {
-            HStack(alignment: .bottom, spacing: 0) {
-                TextField("", text: $inputText, axis: .vertical)
-                    .textInputAutocapitalization(.sentences)
-                    .focused($isInputFocused)
-                    .font(.system(size: 16))
-                    .lineLimit(1...5)
-                    .tint(Color(red: 0.0, green: 0.659, blue: 0.518))
-                    .padding(.vertical, 10)
-                    .padding(.leading, 14)
-                    .padding(.trailing, 4)
-                    .onChange(of: inputText) { _, newValue in
-                        vm.updateSuggestion(for: newValue)
-                    }
-
-                Button(action: {}) {
-                    Image(systemName: "face.smiling")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.secondary)
-                        .padding(.trailing, 10)
-                        .padding(.bottom, 10)
+        HStack(alignment: .bottom, spacing: 0) {
+            TextField("", text: $inputText, axis: .vertical)
+                .textInputAutocapitalization(.sentences)
+                .focused($isInputFocused)
+                .font(.system(size: 17))
+                .lineLimit(1...5)
+                .tint(WA.green)
+                .padding(.vertical, 5)
+                .padding(.leading, 14)
+                .onChange(of: inputText) { _, newValue in
+                    vm.updateSuggestion(for: newValue)
                 }
-                .buttonStyle(.plain)
-                
-            }
-            .background(Color(.systemBackground))
-            .clipShape(Capsule(style: .continuous))
-            .overlay(
-                Capsule(style: .continuous)
-                    .strokeBorder(Color(.systemGray4), lineWidth: 0.8)
-            )
 
-            if !hasText {
-                Button(action: {}) {
-                    Image(systemName: "camera")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.primary)
-                        .frame(width: 36, height: 36)
-                }
-                .buttonStyle(.plain)
-                .transition(.opacity)
-            }
-
-            Button(action: {
-                guard hasText else { return }
-                vm.sendTextMessage(inputText.trimmingCharacters(in: .whitespacesAndNewlines))
-                inputText = ""
-            }) {
-                Image(systemName: hasText ? "paperplane.fill" : "mic")
-                    .font(.system(size: 22))
-                    .foregroundStyle(hasText ? Color(red: 0.0, green: 0.659, blue: 0.518) : .primary)
-                    .frame(width: 36, height: 36)
-                    .animation(.easeOut(duration: 0.15), value: hasText)
+            Button(action: {}) {
+                StickerIcon(size: 15, lineWidth: 1.15, color: .black)
+                    .frame(width: 42, height: WA.inputFieldHeight)
             }
             .buttonStyle(.plain)
         }
-        .animation(.easeOut(duration: 0.15), value: hasText)
+        .frame(minHeight: WA.inputFieldHeight)
+        .background(Color.white)
+        .clipShape(Capsule(style: .continuous))
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(WA.fieldStroke, lineWidth: 0.5)
+        )
+    }
+
+    var cameraButton: some View {
+        Button(action: {}) {
+            Image(systemName: "camera")
+                .font(.system(size: 19))
+                .foregroundStyle(.black)
+                .frame(width: 36, height: WA.inputFieldHeight)
+        }
+        .buttonStyle(.plain)
+        .transition(.opacity)
+    }
+
+    var micButton: some View {
+        Button(action: {}) {
+            Image(systemName: "mic")
+                .font(.system(size: 23))
+                .foregroundStyle(.black)
+                .frame(width: 36, height: WA.inputFieldHeight)
+        }
+        .buttonStyle(.plain)
+        .transition(.opacity)
+    }
+
+    var sendButton: some View {
+        Button(action: { sendCurrentMessage() }) {
+            ZStack {
+                Circle().fill(WA.green).frame(width: 30, height: 30)
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 36, height: WA.inputFieldHeight)
+        }
+        .buttonStyle(.plain)
+        .transition(.opacity)
     }
 }
 
 private extension ChatView {
+    var isWebChat: Bool { vm.chatURL != nil }
+
+    func sendCurrentMessage() {
+        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+
+        if isWebChat {
+            web.sendMessage()
+            web.scrollToBottom()
+        } else {
+            vm.sendTextMessage(text)
+        }
+        inputText = ""
+    }
+
+    func advanceConversation() {
+        if isWebChat {
+            web.sendMessage()
+            web.scrollToBottom()
+        } else {
+            vm.manualTrigger()
+        }
+    }
+
+    func webBottomInset(safeBottom: CGFloat) -> CGFloat {
+        let suggestionSpace: CGFloat = vm.showSuggestion ? suggestionHeight + 8 : 0
+        let keyboardSpace: CGFloat = keyboard.height > 0 ? keyboard.height - safeBottom : 0
+        return inputRowHeight + suggestionSpace + keyboardSpace
+    }
 
     func scrollToBottom(proxy: ScrollViewProxy, delay: Double = 0.22) {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -371,24 +409,22 @@ private extension ChatView {
         }
     }
 
-    func shouldShowTimestamp(at index: Int) -> Bool {
+    func shouldShowDaySeparator(at index: Int) -> Bool {
         let messages = vm.messages
         guard index > 0, index < messages.count else { return index == 0 }
-        let current = messages[index]
-        let previous = messages[index - 1]
-        return current.timestamp.timeIntervalSince(previous.timestamp) > 60
+        return !Calendar.current.isDate(
+            messages[index].timestamp,
+            inSameDayAs: messages[index - 1].timestamp
+        )
     }
 
-    func formattedTimestamp(for date: Date) -> String {
+    func formattedDay(for date: Date) -> String {
         let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInYesterday(date) { return "Yesterday" }
         let formatter = DateFormatter()
-        if calendar.isDateInToday(date) {
-            formatter.dateFormat = "'Today' h:mm a"
-        } else if calendar.isDateInYesterday(date) {
-            formatter.dateFormat = "'Yesterday' h:mm a"
-        } else {
-            formatter.dateFormat = "MMM d, h:mm a"
-        }
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MMMM d"
         return formatter.string(from: date)
     }
 

@@ -1,21 +1,11 @@
-//
-//  NotificationCardView.swift
-//  NotificationLiquidGlass
-//
-//  Created by Andres Marin on 19/02/26.
-//
-
-
 import SwiftUI
 
 @available(iOS 26.0, *)
 public struct NotificationCardView: View {
-
     let notif: LockScreenNotification
 
     public var body: some View {
         HStack(alignment: .center, spacing: 12) {
-
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(notif.iconColor)
                 .frame(width: 38, height: 38)
@@ -40,7 +30,6 @@ public struct NotificationCardView: View {
                     .foregroundStyle(.white.opacity(0.9))
                     .lineLimit(2)
             }
-
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
