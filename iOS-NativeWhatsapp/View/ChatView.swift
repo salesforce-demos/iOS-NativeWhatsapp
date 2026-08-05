@@ -390,6 +390,7 @@ private extension ChatView {
         if isWebChat {
             web.sendMessage()
             web.scrollToBottom()
+            inputText = ""
         } else {
             vm.manualTrigger()
         }

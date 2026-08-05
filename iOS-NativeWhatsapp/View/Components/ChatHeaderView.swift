@@ -191,8 +191,13 @@ struct ChatHeaderView: View {
                 .padding(.trailing, 18)
             }
             .frame(height: WA.navRowHeight)
+            .contentShape(Rectangle())
+            .onTapGesture { onTitleTap() }
 
-            Color.clear.frame(height: WA.headerBottomPadding)
+            Color.clear
+                .frame(height: WA.headerBottomPadding)
+                .contentShape(Rectangle())
+                .onTapGesture { onTitleTap() }
         }
         .frame(height: WA.headerHeight)
         .background(WA.chrome)
