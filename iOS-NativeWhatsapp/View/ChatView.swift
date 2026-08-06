@@ -9,6 +9,7 @@ struct ChatView: View {
     @StateObject private var web = ChatWebController()
     @State private var inputText = ""
     @State private var currentTime = Date()
+    @State private var conversationStarted = false
     @FocusState private var isInputFocused: Bool
 
     private let hasInjectedConfig: Bool
@@ -95,6 +96,7 @@ private extension ChatView {
         .onChange(of: isLocked) { _, locked in
             if locked {
                 isInputFocused = false
+                if let url = vm.chatURL { ChatWebCache.shared.refresh(url) }
                 vm.resetChat()
             } else {
                 if !hasInjectedConfig { vm.loadData() }
@@ -157,7 +159,11 @@ private extension ChatView {
         .padding(.bottom, webBottomInset(safeBottom: geo.safeAreaInsets.bottom))
         .onAppear {
             web.dayLabel = formattedDay(for: Date())
-            web.topInsetPoints = headerHeight
+            if conversationStarted {
+                web.scrollToBottom()
+            } else {
+                web.resetToTop()
+            }
         }
         .onChange(of: keyboard.height) { oldHeight, newHeight in
             if newHeight > oldHeight { web.scrollToBottom() }
@@ -389,6 +395,7 @@ private extension ChatView {
 
     func advanceConversation() {
         if isWebChat {
+            conversationStarted = true
             web.sendMessage()
             web.scrollToBottom()
             inputText = ""

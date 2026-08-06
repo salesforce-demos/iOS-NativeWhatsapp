@@ -36,43 +36,6 @@
         "notifications": [],
         "businessName": "SF Service Demos"
       }
-    },
-    {
-      "chatConfig": {
-        "configName": "Southwest Airlines 2",
-        "contactName": "Southwest Airlines 2",
-        "contactFirstName": "Southwest",
-        "contactStatus": "Business account",
-        "agentImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
-        "contactImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
-        "chatURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/s/?recordName=Southwest%20Airlines&wrapperMode=true",
-        "lastMessage": "Your boarding pass is ready. Check in opens 24 hours before departure.",
-        "lastMessageTime": "2:24 PM",
-        "unreadCount": 3,
-        "isGroup": false,
-        "isVerified": true,
-        "avatarStyle": "photo",
-        "statusBar": {
-          "lockscreen": {
-            "carrier": "Vodafone",
-            "signalBars": 3,
-            "wifiStrength": 2,
-            "showWifi": true,
-            "levelBattery": 0.4,
-            "isCharging": true
-          },
-          "chatview": {
-            "carrier": "Vodafone",
-            "signalBars": 3,
-            "wifiStrength": 2,
-            "showWifi": true,
-            "levelBattery": 0.9,
-            "isCharging": false
-          }
-        },
-        "notifications": [],
-        "businessName": "SF Service Demos"
-      }
     }
   ]
 }

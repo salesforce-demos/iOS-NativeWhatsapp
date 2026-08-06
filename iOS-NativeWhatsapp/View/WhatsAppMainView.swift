@@ -189,6 +189,14 @@ struct WAChatsView: View {
             }
         }
         .task { listVM.loadChats() }
+        .onChange(of: listVM.chatScenarios.count) { _, _ in
+            for scenario in listVM.chatScenarios {
+                if let raw = scenario.chatConfig.chatURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !raw.isEmpty, let url = URL(string: raw) {
+                    ChatWebCache.shared.preload(url)
+                }
+            }
+        }
     }
 
     private var searchBar: some View {
