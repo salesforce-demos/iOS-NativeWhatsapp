@@ -5,7 +5,7 @@
         "configName": "Southwest Airlines",
         "contactName": "Southwest Airlines",
         "contactFirstName": "Southwest",
-        "contactStatus": "Official BA",
+        "contactStatus": "Business account",
         "agentImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
         "contactImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
         "chatURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/s/?recordName=SecondChat&wrapperMode=true",
@@ -34,7 +34,7 @@
           }
         },
         "notifications": [],
-        "businessName": "Southwest Airlines"
+        "businessName": "SF Service Demos"
       }
     },
     {
@@ -42,7 +42,7 @@
         "configName": "Southwest Airlines 2",
         "contactName": "Southwest Airlines 2",
         "contactFirstName": "Southwest",
-        "contactStatus": "Official BA",
+        "contactStatus": "Business account",
         "agentImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
         "contactImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
         "chatURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/s/?recordName=Southwest%20Airlines&wrapperMode=true",
@@ -71,7 +71,7 @@
           }
         },
         "notifications": [],
-        "businessName": "Southwest Airlines"
+        "businessName": "SF Service Demos"
       }
     }
   ]
