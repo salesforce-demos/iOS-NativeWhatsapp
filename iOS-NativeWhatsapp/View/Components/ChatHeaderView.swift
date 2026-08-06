@@ -113,6 +113,7 @@ struct ChatHeaderView: View {
     var isVerified: Bool = false
     var isLogoAvatar: Bool = false
     var businessName: String? = nil
+    var showVideoCall: Bool = false
     var onBack: () -> Void
     var onTitleTap: () -> Void
     var onVideoCall: () -> Void = {}
@@ -147,18 +148,21 @@ struct ChatHeaderView: View {
             Color.clear.frame(height: WA.statusBarHeight)
 
             HStack(spacing: 0) {
-                WAGlassCircleButton(diameter: 45, fill: WA.glassButton, action: onBack) {
-                    HStack(spacing: 3) {
+                Button(action: onBack) {
+                    HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 19, weight: .semibold))
+                            .font(.system(size: 21, weight: .semibold))
                         if let backBadge {
                             Text(backBadge)
                                 .font(.system(size: 17))
                         }
                     }
                     .foregroundStyle(.black)
+                    .frame(minWidth: 44, minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-                .padding(.leading, 19)
+                .buttonStyle(.plain)
+                .padding(.leading, 20)
 
                 Button(action: onTitleTap) {
                     HStack(spacing: 12) {
@@ -185,7 +189,7 @@ struct ChatHeaderView: View {
                 Spacer(minLength: 8)
 
                 HStack(spacing: 0) {
-                    if !isVerified {
+                    if showVideoCall {
                         Button(action: onVideoCall) {
                             Image(systemName: "video")
                                 .font(.system(size: 23))
@@ -199,7 +203,7 @@ struct ChatHeaderView: View {
                         Image(systemName: "phone")
                             .font(.system(size: 23))
                             .foregroundStyle(.black)
-                            .frame(width: isVerified ? 45 : 55, height: 45)
+                            .frame(width: showVideoCall ? 55 : 45, height: 45)
                     }
                     .buttonStyle(.plain)
                 }
