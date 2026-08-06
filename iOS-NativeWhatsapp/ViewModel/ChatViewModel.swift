@@ -277,10 +277,10 @@ class ChatViewModel: ObservableObject {
         currentStepIndex += 1
 
         if step.isCurrentUser {
-            addMessage(step.contentText, isCurrentUser: true, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime)
+            addMessage(step.contentText, isCurrentUser: true, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime, step: step)
             checkNextStep()
         } else {
-            triggerFakeResponse(text: step.contentText, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime)
+            triggerFakeResponse(text: step.contentText, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime, step: step)
         }
     }
 
@@ -301,13 +301,22 @@ class ChatViewModel: ObservableObject {
         return Date()
     }
 
-    private func addMessage(_ text: String, isCurrentUser: Bool, imageURL: String? = nil, options: [MessageOption]? = nil, sendTime: String? = nil) {
+    private func addMessage(_ text: String,
+                            isCurrentUser: Bool,
+                            imageURL: String? = nil,
+                            options: [MessageOption]? = nil,
+                            sendTime: String? = nil,
+                            step: JSONMessage? = nil) {
         let newMessage = UIMessage(
             text: text,
             isCurrentUser: isCurrentUser,
             timestamp: Self.timestamp(from: sendTime),
             imageURL: imageURL,
-            options: options
+            options: options,
+            component: step?.component,
+            assetName: step?.assetName,
+            items: step?.items,
+            buttons: step?.buttons
         )
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -320,16 +329,16 @@ class ChatViewModel: ObservableObject {
         }
     }
 
-    private func triggerFakeResponse(text: String, imageURL: String? = nil, options: [MessageOption]? = nil, sendTime: String? = nil) {
+    private func triggerFakeResponse(text: String, imageURL: String? = nil, options: [MessageOption]? = nil, sendTime: String? = nil, step: JSONMessage? = nil) {
         withAnimation { self.isTyping = true }
         self.contactStatus = "typing…"
 
-        let typingDuration = min(Double(text.count) * 0.05, 2.5)
+        let typingDuration = step?.typingSeconds ?? min(Double(text.count) * 0.05, 2.5)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + typingDuration) { [weak self] in
             guard let self = self else { return }
 
-            self.addMessage(text, isCurrentUser: false, imageURL: imageURL, options: options, sendTime: sendTime)
+            self.addMessage(text, isCurrentUser: false, imageURL: imageURL, options: options, sendTime: sendTime, step: step)
             withAnimation { self.isTyping = false }
             self.contactStatus = "online"
 

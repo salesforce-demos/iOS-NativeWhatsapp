@@ -125,6 +125,10 @@ struct JSONMessage: Codable, Identifiable {
     let sender: String?
     let options: [MessageOption]?
     let actions: [MessageAction]?
+    let assetName: String?
+    let items: [String]?
+    let buttons: [MessageButton]?
+    let typingSeconds: Double?
 
     var isCurrentUser: Bool {
         return sender == "Customer"
@@ -145,6 +149,13 @@ struct JSONMessage: Codable, Identifiable {
     var hasActions: Bool {
         return !(actions?.isEmpty ?? true)
     }
+}
+
+struct MessageButton: Codable, Identifiable, Equatable {
+    var id: String { (title ?? "") + (icon ?? "") }
+
+    let title: String?
+    let icon: String?
 }
 
 struct MessageOption: Codable, Identifiable, Equatable {
@@ -194,13 +205,29 @@ struct UIMessage: Identifiable, Equatable {
     let timestamp: Date
     let imageURL: String?
     let options: [MessageOption]?
+    let component: String?
+    let assetName: String?
+    let items: [String]?
+    let buttons: [MessageButton]?
 
-    init(text: String, isCurrentUser: Bool, timestamp: Date = Date(), imageURL: String? = nil, options: [MessageOption]? = nil) {
+    init(text: String,
+         isCurrentUser: Bool,
+         timestamp: Date = Date(),
+         imageURL: String? = nil,
+         options: [MessageOption]? = nil,
+         component: String? = nil,
+         assetName: String? = nil,
+         items: [String]? = nil,
+         buttons: [MessageButton]? = nil) {
         self.text = text
         self.isCurrentUser = isCurrentUser
         self.timestamp = timestamp
         self.imageURL = imageURL
         self.options = options
+        self.component = component
+        self.assetName = assetName
+        self.items = items
+        self.buttons = buttons
     }
 
     static func == (lhs: UIMessage, rhs: UIMessage) -> Bool {
@@ -208,6 +235,10 @@ struct UIMessage: Identifiable, Equatable {
                lhs.isCurrentUser == rhs.isCurrentUser &&
                lhs.timestamp == rhs.timestamp &&
                lhs.imageURL == rhs.imageURL &&
-               lhs.options == rhs.options
+               lhs.options == rhs.options &&
+               lhs.component == rhs.component &&
+               lhs.assetName == rhs.assetName &&
+               lhs.items == rhs.items &&
+               lhs.buttons == rhs.buttons
     }
 }

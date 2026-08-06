@@ -46,15 +46,172 @@ struct WAEncryptionNotice: View {
     }
 }
 
+
+struct WaChecklistBubble: View {
+    let text: String
+    let items: [String]
+    let timestamp: Date
+
+    @State private var shown = 0
+
+    private var timeString: String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm a"
+        return f.string(from: timestamp)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(text)
+                .font(.system(size: 16))
+                .foregroundColor(.black.opacity(0.85))
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Color(.displayP3, red: 0.86, green: 0.96, blue: 0.89))
+                                .frame(width: 22, height: 22)
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(Color(.displayP3, red: 0.13, green: 0.60, blue: 0.33))
+                        }
+                        Text(item)
+                            .font(.system(size: 15))
+                            .foregroundColor(.black.opacity(0.75))
+                    }
+                    .opacity(index < shown ? 1 : 0)
+                    .scaleEffect(index < shown ? 1 : 0.85, anchor: .leading)
+                    .offset(y: index < shown ? 0 : 6)
+                }
+            }
+
+            HStack {
+                Spacer()
+                Text(timeString)
+                    .font(.system(size: 11))
+                    .foregroundColor(.black.opacity(0.42))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.08), radius: 1, x: 0, y: 1)
+        )
+        .onAppear { revealNext() }
+    }
+
+    private func revealNext() {
+        guard shown < items.count else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35 + Double(shown) * 0.28) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) { shown += 1 }
+            revealNext()
+        }
+    }
+}
+
+struct WaAssetBubble: View {
+    let assetName: String
+    let text: String?
+    let buttons: [MessageButton]?
+    let timestamp: Date
+    let isCurrentUser: Bool
+
+    private var timeString: String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm a"
+        return f.string(from: timestamp)
+    }
+
+    private var bubbleColor: Color {
+        isCurrentUser ? Color(red: 0.851, green: 0.992, blue: 0.831) : .white
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Image(assetName)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+
+            if let text, !text.isEmpty {
+                Text(text)
+                    .font(.system(size: 16))
+                    .foregroundColor(.black.opacity(0.85))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 10)
+                    .padding(.top, 6)
+            }
+
+            if let buttons, !buttons.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(buttons) { button in
+                        Divider().opacity(0.35)
+                        Button(action: {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }) {
+                            HStack(spacing: 8) {
+                                if let icon = button.icon, !icon.isEmpty {
+                                    Image(systemName: icon)
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                Text(button.title ?? "")
+                                    .font(.system(size: 16, weight: .semibold))
+                            }
+                            .foregroundStyle(Color(.displayP3, red: 0.05, green: 0.40, blue: 0.92))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 13)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(WaCardButtonStyle())
+                    }
+                }
+            }
+
+            HStack {
+                Spacer()
+                Text(timeString)
+                    .font(.system(size: 11))
+                    .foregroundColor(.black.opacity(0.42))
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 4)
+            .padding(.bottom, 6)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(bubbleColor)
+                .shadow(color: .black.opacity(0.08), radius: 1, x: 0, y: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+}
+
+struct WaCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(configuration.isPressed ? Color.black.opacity(0.05) : Color.clear)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
 struct MessageBubble: View {
     let message: UIMessage
     var isLastInGroup: Bool = true
     var onOptionSelected: ((MessageOption) -> Void)? = nil
 
     private var hasImage: Bool { !(message.imageURL ?? "").isEmpty }
+    private var hasAsset: Bool { !(message.assetName ?? "").isEmpty }
     private var hasText: Bool { !message.text.isEmpty }
     private var hasOptions: Bool { !(message.options?.isEmpty ?? true) }
-    private var hasContent: Bool { hasImage || hasText || hasOptions }
+    private var hasContent: Bool { hasImage || hasAsset || hasText || hasOptions }
 
     var body: some View {
         if hasContent {
@@ -62,7 +219,21 @@ struct MessageBubble: View {
                 if message.isCurrentUser { Spacer(minLength: 52) }
 
                 VStack(alignment: message.isCurrentUser ? .trailing : .leading, spacing: 4) {
-                    if hasImage {
+                    if hasAsset {
+                        WaAssetBubble(
+                            assetName: message.assetName ?? "",
+                            text: hasText ? message.text : nil,
+                            buttons: message.buttons,
+                            timestamp: message.timestamp,
+                            isCurrentUser: message.isCurrentUser
+                        )
+                    } else if message.component == "checklist" {
+                        WaChecklistBubble(
+                            text: message.text,
+                            items: message.items ?? [],
+                            timestamp: message.timestamp
+                        )
+                    } else if hasImage {
                         WaBubbleWithImage(
                             imageURL: resolveImageURL(rawPath: message.imageURL ?? ""),
                             text: hasText ? message.text : nil,
@@ -89,7 +260,7 @@ struct MessageBubble: View {
                         .padding(.top, hasText || hasImage ? 4 : 0)
                     }
                 }
-                .frame(maxWidth: 264, alignment: message.isCurrentUser ? .trailing : .leading)
+                .frame(maxWidth: hasAsset ? 300 : 264, alignment: message.isCurrentUser ? .trailing : .leading)
 
                 if !message.isCurrentUser { Spacer(minLength: 52) }
             }

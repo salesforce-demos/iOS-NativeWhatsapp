@@ -2,8 +2,101 @@
   "chats": [
     {
       "chatConfig": {
-        "configName": "Southwest Airlines",
+        "configName": "Southwest Airlines Help Agent",
         "contactName": "Southwest Airlines",
+        "contactFirstName": "Southwest",
+        "contactStatus": "Business account",
+        "agentImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
+        "contactImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
+        "lastMessage": "Your bag has been located — delayed at SFO, next flight WN 2214.",
+        "lastMessageTime": "1:30 PM",
+        "unreadCount": 2,
+        "isGroup": false,
+        "isVerified": true,
+        "avatarStyle": "photo",
+        "businessName": "SF Service Demos",
+        "statusBar": {
+          "lockscreen": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.4,
+            "isCharging": true
+          },
+          "chatview": {
+            "carrier": "Vodafone",
+            "signalBars": 3,
+            "wifiStrength": 2,
+            "showWifi": true,
+            "levelBattery": 0.9,
+            "isCharging": false
+          }
+        },
+        "notifications": [],
+        "transcriptSpeed": 400,
+        "messagesFilteredByDate": [
+          {
+            "day": "Today",
+            "shown": true,
+            "messages": [
+              {
+                "day": "Today",
+                "sendTime": "1:30 PM",
+                "order": 1,
+                "text": "Hi, this is my bag tag. It didn't arrive at baggage claim - can you help me find it?",
+                "sender": "Customer",
+                "sendAutimatically": false,
+                "assetName": "bagTag"
+              },
+              {
+                "day": "Today",
+                "sendTime": "1:30 PM",
+                "order": 2,
+                "text": "I matched your bag tag and found the latest record. Your bag is delayed and still at SFO — next steps below.",
+                "sender": "Agent",
+                "sendAutimatically": true,
+                "component": "checklist",
+                "typingSeconds": 1.8,
+                "items": [
+                  "Bag tag recognized",
+                  "Trip matched",
+                  "Latest baggage scan found"
+                ]
+              },
+              {
+                "day": "Today",
+                "sendTime": "1:30 PM",
+                "order": 3,
+                "text": "",
+                "sender": "Agent",
+                "sendAutimatically": true,
+                "assetName": "bagCard",
+                "typingSeconds": 2.2,
+                "buttons": [
+                  {
+                    "title": "Track My Bag",
+                    "icon": "bag.fill"
+                  },
+                  {
+                    "title": "Get Directions to the Service Office",
+                    "icon": "location.fill"
+                  },
+                  {
+                    "title": "Create a Baggage Report",
+                    "icon": "exclamationmark.square.fill"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "chatConfig": {
+        "configName": "Southwest Airlines",
+        "contactName": "Southwest Airlines · Web",
         "contactFirstName": "Southwest",
         "contactStatus": "Business account",
         "agentImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
