@@ -259,7 +259,8 @@ class ChatViewModel: ObservableObject {
         print("Verificando paso \(currentStepIndex + 1)/\(script.count): sender=\(nextMsg.sender ?? "unknown"), auto=\(nextMsg.shouldAutoSend)")
 
         if nextMsg.shouldAutoSend {
-            let delay = nextMsg.isCurrentUser ? 0.5 : 1.0
+            let previousPause = currentStepIndex > 0 ? (script[currentStepIndex - 1].pauseSeconds ?? 0) : 0
+            let delay = (nextMsg.isCurrentUser ? 0.5 : 1.0) + previousPause
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 self?.processNextMessage()
             }

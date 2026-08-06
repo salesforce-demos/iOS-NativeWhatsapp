@@ -611,43 +611,38 @@ struct MessageOptionView: View {
 }
 
 struct TypingBubbleView: View {
-    @State private var isAnimating = false
-    @Environment(\.colorScheme) private var colorScheme
+    @State private var animating = false
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            ZStack(alignment: .bottomLeading) {
-                WaBubbleShape(isCurrentUser: false, showTail: true)
-                    .fill(colorScheme == .dark ? Color.waBubbleInDark : Color.waBubbleInLight)
-                    .shadow(color: .black.opacity(colorScheme == .dark ? 0.3 : 0.08), radius: 1, x: 0, y: 1)
-
-                HStack(spacing: 5) {
-                    ForEach(0..<3, id: \.self) { index in
-                        Circle()
-                            .frame(width: 7, height: 7)
-                            .foregroundColor(Color.gray.opacity(0.55))
-                            .scaleEffect(isAnimating ? 1.1 : 0.6)
-                            .opacity(isAnimating ? 1.0 : 0.35)
-                            .animation(
-                                Animation.easeInOut(duration: 0.55)
-                                    .repeatForever(autoreverses: true)
-                                    .delay(0.18 * Double(index)),
-                                value: isAnimating
-                            )
-                    }
+        HStack(spacing: 0) {
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(Color.black.opacity(0.28))
+                        .frame(width: 8, height: 8)
+                        .scaleEffect(animating ? 1.0 : 0.55)
+                        .opacity(animating ? 1.0 : 0.4)
+                        .animation(
+                            .easeInOut(duration: 0.6)
+                                .repeatForever(autoreverses: true)
+                                .delay(0.16 * Double(index)),
+                            value: animating
+                        )
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 13)
-                .padding(.leading, 6)
             }
-            .fixedSize()
+            .padding(.horizontal, 14)
+            .padding(.vertical, 13)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.white)
+                    .shadow(color: .black.opacity(0.08), radius: 1, x: 0, y: 1)
+            )
 
-            Spacer(minLength: 60)
+            Spacer(minLength: 0)
         }
-        .padding(.leading, 4)
-        .padding(.trailing, 10)
-        .padding(.vertical, 1)
-        .onAppear { isAnimating = true }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
+        .onAppear { animating = true }
     }
 }
 

@@ -62,7 +62,8 @@
                   "Bag tag recognized",
                   "Trip matched",
                   "Latest baggage scan found"
-                ]
+                ],
+                "pauseSeconds": 1.4
               },
               {
                 "day": "Today",

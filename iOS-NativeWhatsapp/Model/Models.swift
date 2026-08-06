@@ -129,6 +129,7 @@ struct JSONMessage: Codable, Identifiable {
     let items: [String]?
     let buttons: [MessageButton]?
     let typingSeconds: Double?
+    let pauseSeconds: Double?
 
     var isCurrentUser: Bool {
         return sender == "Customer"
