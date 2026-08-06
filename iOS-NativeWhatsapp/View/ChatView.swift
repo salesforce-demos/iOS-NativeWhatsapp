@@ -70,14 +70,6 @@ private extension ChatView {
 
                 VStack {
                     Spacer()
-                    if vm.isTyping {
-                        TypingBubbleView()
-                            .padding(.bottom, 4)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .opacity),
-                                removal: .move(edge: .bottom).combined(with: .opacity)
-                            ))
-                    }
                     inputBar
                         .padding(.bottom, keyboard.height > 0
                             ? keyboard.height - geo.safeAreaInsets.bottom
@@ -209,6 +201,15 @@ private extension ChatView {
                         .id(msg.id)
                     }
 
+                    if vm.isTyping {
+                        TypingBubbleView()
+                            .padding(.top, 2)
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.9, anchor: .bottomLeading).combined(with: .opacity),
+                                removal: .opacity
+                            ))
+                    }
+
                     Color.clear
                         .frame(height: 20)
                         .id("bottom")
@@ -228,8 +229,9 @@ private extension ChatView {
                 }
                 scrollToBottom(proxy: proxy, delay: 0.05)
             }
-            .onChange(of: vm.isTyping) { _, _ in
-                scrollToBottom(proxy: proxy, delay: 0.05)
+            .onChange(of: vm.isTyping) { _, typing in
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { }
+                scrollToBottom(proxy: proxy, delay: typing ? 0.08 : 0.02)
             }
             .onChange(of: isInputFocused) { _, focused in
                 if focused {
