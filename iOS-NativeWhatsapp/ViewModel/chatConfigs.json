@@ -33,7 +33,8 @@
             "isCharging": false
           }
         },
-        "notifications": []
+        "notifications": [],
+        "businessName": ""
       }
     },
     {
@@ -69,7 +70,8 @@
             "isCharging": false
           }
         },
-        "notifications": []
+        "notifications": [],
+        "businessName": ""
       }
     }
   ]

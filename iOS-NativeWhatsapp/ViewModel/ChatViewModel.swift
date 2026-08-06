@@ -19,6 +19,7 @@ class ChatViewModel: ObservableObject {
 
     @Published var chatURL: URL? = nil
     @Published var isVerified: Bool = false
+    @Published var businessName: String? = nil
     @Published var isLogoAvatar: Bool = false
 
     private var script: [JSONMessage] = []
@@ -96,6 +97,7 @@ class ChatViewModel: ObservableObject {
         self.contactStatus = config.contactStatus ?? "online"
 
         self.isVerified = config.isVerified ?? false
+        self.businessName = config.businessName
         self.isLogoAvatar = (config.avatarStyle ?? "photo").lowercased() == "logo"
 
         if let raw = config.chatURL?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty {
@@ -354,6 +356,7 @@ class ChatViewModel: ObservableObject {
         chatURL = nil
         isVerified = false
         isLogoAvatar = false
+        businessName = nil
 
         script = []
         currentStepIndex = 0

@@ -112,10 +112,35 @@ struct ChatHeaderView: View {
     var backBadge: String? = nil
     var isVerified: Bool = false
     var isLogoAvatar: Bool = false
+    var businessName: String? = nil
     var onBack: () -> Void
     var onTitleTap: () -> Void
     var onVideoCall: () -> Void = {}
     var onVoiceCall: () -> Void = {}
+
+    @ViewBuilder
+    private var subtitleLine: some View {
+        if isVerified {
+            HStack(spacing: 5) {
+                if let businessName, !businessName.isEmpty {
+                    Text(businessName)
+                }
+                WAVerifiedBadge(size: 12)
+                if let businessName, !businessName.isEmpty {
+                    Text("·")
+                }
+                Text(subtitle)
+            }
+            .font(.system(size: 12))
+            .foregroundStyle(WA.subtitle)
+            .lineLimit(1)
+        } else {
+            Text(subtitle)
+                .font(.system(size: 12))
+                .foregroundStyle(WA.subtitle)
+                .lineLimit(1)
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -145,19 +170,12 @@ struct ChatHeaderView: View {
                         )
 
                         VStack(alignment: .leading, spacing: 0) {
-                            HStack(spacing: 4) {
-                                Text(title.isEmpty ? "Contact" : title)
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundStyle(.black)
-                                    .lineLimit(1)
-                                if isVerified {
-                                    WAVerifiedBadge(size: 15)
-                                }
-                            }
-                            Text(subtitle)
-                                .font(.system(size: 12))
-                                .foregroundStyle(WA.subtitle)
+                            Text(title.isEmpty ? "Contact" : title)
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.black)
                                 .lineLimit(1)
+
+                            subtitleLine
                         }
                     }
                 }
@@ -167,19 +185,21 @@ struct ChatHeaderView: View {
                 Spacer(minLength: 8)
 
                 HStack(spacing: 0) {
-                    Button(action: onVideoCall) {
-                        Image(systemName: "video")
-                            .font(.system(size: 23))
-                            .foregroundStyle(.black)
-                            .frame(width: 55, height: 45)
+                    if !isVerified {
+                        Button(action: onVideoCall) {
+                            Image(systemName: "video")
+                                .font(.system(size: 23))
+                                .foregroundStyle(.black)
+                                .frame(width: 55, height: 45)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
 
                     Button(action: onVoiceCall) {
                         Image(systemName: "phone")
                             .font(.system(size: 23))
                             .foregroundStyle(.black)
-                            .frame(width: 55, height: 45)
+                            .frame(width: isVerified ? 45 : 55, height: 45)
                     }
                     .buttonStyle(.plain)
                 }

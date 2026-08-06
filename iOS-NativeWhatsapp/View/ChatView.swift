@@ -113,6 +113,7 @@ private extension ChatView {
             backBadge: backBadge,
             isVerified: vm.isVerified,
             isLogoAvatar: vm.isLogoAvatar,
+            businessName: vm.businessName,
             onBack: {
                 isInputFocused = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {

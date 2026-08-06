@@ -35,6 +35,7 @@ struct ChatConfig: Codable {
     let isGroup: Bool?
     let isVerified: Bool?
     let avatarStyle: String?
+    let businessName: String?
 
     let botImageURL: String?
     let otherImageURL: String?
