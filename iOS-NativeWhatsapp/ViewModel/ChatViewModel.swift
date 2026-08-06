@@ -317,7 +317,8 @@ class ChatViewModel: ObservableObject {
             component: step?.component,
             assetName: step?.assetName,
             items: step?.items,
-            buttons: step?.buttons
+            buttons: step?.buttons,
+            card: step?.card
         )
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {

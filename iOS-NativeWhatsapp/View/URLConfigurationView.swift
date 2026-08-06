@@ -106,11 +106,19 @@ struct URLConfigurationView: View {
             Button(action: {
                 performSearch()
             }) {
-                Image(systemName: isSearching ? "hourglass" : "magnifyingglass")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.gray)
-                    .frame(width: 22, height: 22)
-                    .contentTransition(.symbolEffect(.replace))
+                ZStack {
+                    if isSearching {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .controlSize(.small)
+                            .tint(.gray)
+                    } else {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.gray)
+                    }
+                }
+                .frame(width: 22, height: 22)
             }
             .disabled(isSearching)
 
@@ -212,12 +220,7 @@ struct URLConfigurationView: View {
 
     private func useLocalJSON() {
         inputURL = ""
-
-        chatServiceURL = ""
-        UserDefaults.standard.set("", forKey: "chatServiceURL")
-        withAnimation(.easeInOut(duration: 0.3)) {
-            isConfigured = true
-        }
+        load(urlToSave: "")
     }
 
     private func performSearch() {
@@ -228,24 +231,39 @@ struct URLConfigurationView: View {
             return
         }
 
-        isSearching = true
-
         var urlToSave = trimmedURL
-
         if !urlToSave.lowercased().hasPrefix("http://") && !urlToSave.lowercased().hasPrefix("https://") {
             urlToSave = "https://" + urlToSave
         }
+        load(urlToSave: urlToSave)
+    }
+
+    private func load(urlToSave: String) {
+        isSearching = true
+        isTextFieldFocused = false
 
         chatServiceURL = urlToSave
+        UserDefaults.standard.set(urlToSave, forKey: "chatServiceURL")
+        NetworkService.shared.baseURL = urlToSave
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            isSearching = false
-
-            UserDefaults.standard.set(urlToSave, forKey: "chatServiceURL")
-
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isConfigured = true
+        NetworkService.shared.fetchAllChats { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let scenarios):
+                    WAImageCache.shared.preload(from: scenarios) {
+                        enter()
+                    }
+                case .failure:
+                    enter()
+                }
             }
+        }
+    }
+
+    private func enter() {
+        isSearching = false
+        withAnimation(.easeInOut(duration: 0.3)) {
+            isConfigured = true
         }
     }
 }

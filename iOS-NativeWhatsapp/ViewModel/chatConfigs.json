@@ -47,7 +47,8 @@
                 "text": "Hi, this is my bag tag. It didn't arrive at baggage claim - can you help me find it?",
                 "sender": "Customer",
                 "sendAutimatically": false,
-                "assetName": "bagTag"
+                "assetName": "bagTag",
+                "imageURL": ""
               },
               {
                 "day": "Today",
@@ -72,7 +73,6 @@
                 "text": "",
                 "sender": "Agent",
                 "sendAutimatically": true,
-                "assetName": "bagCard",
                 "typingSeconds": 2.2,
                 "buttons": [
                   {
@@ -87,7 +87,85 @@
                     "title": "Create a Baggage Report",
                     "icon": "exclamationmark.square.fill"
                   }
-                ]
+                ],
+                "component": "baggageCard",
+                "card": {
+                  "headerTitle": "Your bag has been located",
+                  "headerChip": "Delayed at SFO · Next flight WN 2214",
+                  "tripTitle": "TRIP & BAG DETAILS",
+                  "tripIcon": "airplane.departure",
+                  "fromCode": "SFO",
+                  "fromName": "San Francisco",
+                  "toCode": "LGA",
+                  "toName": "New York LaGuardia",
+                  "progress": 0.72,
+                  "tiles": [
+                    {
+                      "label": "ARRIVAL TERMINAL",
+                      "value": "Terminal B"
+                    },
+                    {
+                      "label": "SOUTHWEST GATES",
+                      "value": "Gates 53-57"
+                    },
+                    {
+                      "label": "BAG TAG",
+                      "value": "WN 526 8841",
+                      "mono": true
+                    },
+                    {
+                      "label": "CURRENT LOCATION",
+                      "value": "Located at SFO",
+                      "style": "amber"
+                    }
+                  ],
+                  "tripNote": "Transfer to LGA on flight **WN 2214** · departs 6:55 PM PT.",
+                  "alertBadge": "ACTION REQUIRED",
+                  "alertTitle": "Complete a delayed-bag report within 4 hours of arrival.",
+                  "alertBody": "Visit the service office before leaving the airport - this report allows Southwest to transfer and deliver your bag.",
+                  "alertPlace": "Southwest Baggage Service Office",
+                  "alertPlaceDetail": "LaGuardia Airport, Terminal B",
+                  "alertChip": "Level 2 - Arrivals",
+                  "sections": [
+                    {
+                      "title": "FROM YOUR ARRIVAL GATE",
+                      "icon": "location.north.fill",
+                      "style": "numbered",
+                      "items": [
+                        {
+                          "text": "Follow signs for **Baggage Claim**."
+                        },
+                        {
+                          "text": "Go to **Level 2 - Arrivals**."
+                        },
+                        {
+                          "text": "Find the **Southwest Baggage Service Office**."
+                        }
+                      ]
+                    },
+                    {
+                      "title": "PLEASE HAVE READY",
+                      "icon": "bag.fill",
+                      "style": "icons",
+                      "items": [
+                        {
+                          "text": "Photo ID",
+                          "icon": "person.text.rectangle.fill"
+                        },
+                        {
+                          "text": "Boarding pass or trip confirmation",
+                          "icon": "doc.text.fill"
+                        },
+                        {
+                          "text": "Bag-tag receipt or photo",
+                          "icon": "camera.fill"
+                        }
+                      ]
+                    }
+                  ],
+                  "footNote": "You do not need to wait at the airport. Once your report is complete, we'll deliver your bag to your preferred address.",
+                  "footNoteIcon": "house.fill"
+                }
               }
             ]
           }

@@ -47,6 +47,371 @@ struct WAEncryptionNotice: View {
 }
 
 
+enum WACard {
+    static let headerBlue  = WA.p3(0x3157D0)
+    static let headerChip  = WA.p3(0x5272D8)
+    static let tile        = WA.p3(0xF4F6FB)
+    static let amberFill   = WA.p3(0xFFF4D6)
+    static let amberStroke = WA.p3(0xE3C173)
+    static let amberText   = WA.p3(0x8A6100)
+    static let alertFill   = WA.p3(0xFFF6DF)
+    static let badgeRed    = WA.p3(0xDF2B2B)
+    static let noteFill    = WA.p3(0xEEF2FA)
+    static let accent      = WA.p3(0x2F5ABF)
+    static let link        = WA.p3(0x1672D9)
+    static let title       = WA.p3(0x2A3240)
+    static let body        = WA.p3(0x4A5568)
+    static let label       = WA.p3(0x8A93A3)
+    static let hairline    = WA.p3(0xE6E8EC)
+}
+
+struct WABaggageCard: View {
+    let card: CardContent
+    let buttons: [MessageButton]?
+    let timestamp: Date
+
+    @State private var revealed = false
+
+    private var timeString: String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm a"
+        return f.string(from: timestamp)
+    }
+
+    private func styled(_ raw: String?, size: CGFloat, color: Color) -> Text {
+        let value = raw ?? ""
+        if let attributed = try? AttributedString(markdown: value) {
+            return Text(attributed).font(.system(size: size)).foregroundColor(color)
+        }
+        return Text(value).font(.system(size: size)).foregroundColor(color)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if card.headerTitle != nil { header }
+            if card.fromCode != nil || card.tiles != nil { trip }
+            if card.alertTitle != nil { alert }
+            ForEach(Array((card.sections ?? []).enumerated()), id: \.offset) { _, section in
+                Divider().overlay(WACard.hairline)
+                sectionView(section)
+            }
+            if let footNote = card.footNote { note(footNote) }
+            if let buttons, !buttons.isEmpty { buttonRows(buttons) }
+
+            HStack {
+                Spacer()
+                Text(timeString)
+                    .font(.system(size: 11))
+                    .foregroundColor(.black.opacity(0.42))
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 6)
+            .padding(.bottom, 7)
+        }
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .shadow(color: .black.opacity(0.08), radius: 1, x: 0, y: 1)
+        .opacity(revealed ? 1 : 0)
+        .scaleEffect(revealed ? 1 : 0.96, anchor: .bottomLeading)
+        .onAppear {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { revealed = true }
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(card.headerTitle ?? "")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.white)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let chip = card.headerChip {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(WA.p3(0xF5C518))
+                        .frame(width: 8, height: 8)
+                    Text(chip)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Capsule().fill(WACard.headerChip))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(WACard.headerBlue)
+    }
+
+    private var trip: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let title = card.tripTitle {
+                HStack(spacing: 6) {
+                    Image(systemName: card.tripIcon ?? "airplane.departure")
+                        .font(.system(size: 12, weight: .bold))
+                    Text(title)
+                        .font(.system(size: 12, weight: .bold))
+                        .tracking(0.4)
+                }
+                .foregroundColor(WACard.accent)
+            }
+
+            if card.fromCode != nil {
+                HStack(alignment: .top, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(card.fromCode ?? "")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(WACard.title)
+                        Text(card.fromName ?? "")
+                            .font(.system(size: 13))
+                            .foregroundColor(WACard.body)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+
+                    route
+                        .frame(height: 30)
+                        .frame(maxWidth: .infinity)
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(card.toCode ?? "")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(WACard.title)
+                        Text(card.toName ?? "")
+                            .font(.system(size: 13))
+                            .foregroundColor(WACard.body)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+
+            if let tiles = card.tiles, !tiles.isEmpty {
+                let rows = stride(from: 0, to: tiles.count, by: 2).map { Array(tiles[$0..<min($0 + 2, tiles.count)]) }
+                VStack(spacing: 8) {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        HStack(spacing: 8) {
+                            ForEach(Array(row.enumerated()), id: \.offset) { _, tile in
+                                tileView(tile)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if let note = card.tripNote {
+                styled(note, size: 14, color: WACard.title)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+    }
+
+    private var route: some View {
+        GeometryReader { geo in
+            let progress = min(max(card.progress ?? 0.7, 0), 1)
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(WACard.hairline)
+                    .frame(height: 3)
+                Capsule()
+                    .fill(WACard.accent)
+                    .frame(width: geo.size.width * progress, height: 3)
+                Image(systemName: "airplane")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(WACard.accent)
+                    .offset(x: max(0, geo.size.width * progress - 8))
+                Image(systemName: "suitcase.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(WACard.amberText)
+                    .offset(x: min(geo.size.width - 14, geo.size.width * progress + 14))
+            }
+            .frame(height: geo.size.height, alignment: .center)
+        }
+    }
+
+    private func tileView(_ tile: CardTile) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(tile.label ?? "")
+                .font(.system(size: 11))
+                .foregroundColor(WACard.label)
+                .lineLimit(1)
+
+            if tile.style == "amber" {
+                HStack(spacing: 4) {
+                    Image(systemName: "clock.fill").font(.system(size: 10))
+                    Text(tile.value ?? "")
+                        .font(.system(size: 13, weight: .semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .foregroundColor(WACard.amberText)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule().fill(WACard.amberFill)
+                        .overlay(Capsule().strokeBorder(WACard.amberStroke, lineWidth: 1))
+                )
+            } else {
+                Text(tile.value ?? "")
+                    .font(tile.mono == true
+                          ? .system(size: 15, weight: .semibold, design: .monospaced)
+                          : .system(size: 15, weight: .semibold))
+                    .foregroundColor(WACard.title)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 9)
+        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(WACard.tile))
+    }
+
+    private var alert: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let badge = card.alertBadge {
+                HStack(spacing: 5) {
+                    Image(systemName: "clock.fill").font(.system(size: 10, weight: .bold))
+                    Text(badge)
+                        .font(.system(size: 11, weight: .bold))
+                        .tracking(0.4)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(WACard.badgeRed))
+            }
+
+            Text(card.alertTitle ?? "")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(WACard.title)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let body = card.alertBody {
+                Text(body)
+                    .font(.system(size: 14))
+                    .foregroundColor(WACard.body)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if let place = card.alertPlace {
+                Text(place)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(WACard.title)
+                    .padding(.top, 2)
+            }
+            if let detail = card.alertPlaceDetail {
+                Text(detail)
+                    .font(.system(size: 14))
+                    .foregroundColor(WACard.body)
+            }
+            if let chip = card.alertChip {
+                Text(chip)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(WACard.accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(WACard.noteFill))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(WACard.alertFill)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(WACard.amberStroke.opacity(0.5), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 12)
+        .padding(.bottom, 12)
+    }
+
+    private func sectionView(_ section: CardSection) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: section.icon ?? "circle.fill")
+                    .font(.system(size: 13, weight: .bold))
+                Text(section.title ?? "")
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(0.4)
+            }
+            .foregroundColor(WACard.accent)
+
+            VStack(alignment: .leading, spacing: 9) {
+                ForEach(Array((section.items ?? []).enumerated()), id: \.offset) { index, item in
+                    HStack(alignment: .top, spacing: 9) {
+                        if section.style == "numbered" {
+                            Text("\(index + 1)")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 19, height: 19)
+                                .background(Circle().fill(WACard.accent))
+                        } else {
+                            Image(systemName: item.icon ?? "checkmark")
+                                .font(.system(size: 13))
+                                .foregroundColor(WACard.accent)
+                                .frame(width: 19, height: 19)
+                        }
+
+                        styled(item.text, size: 15, color: WACard.title)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 13)
+    }
+
+    private func note(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: card.footNoteIcon ?? "house.fill")
+                .font(.system(size: 13))
+                .foregroundColor(WACard.accent)
+            Text(text)
+                .font(.system(size: 14))
+                .foregroundColor(WACard.body)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(WACard.noteFill)
+    }
+
+    private func buttonRows(_ buttons: [MessageButton]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(buttons) { button in
+                Divider().overlay(WACard.hairline)
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }) {
+                    HStack(spacing: 8) {
+                        if let icon = button.icon, !icon.isEmpty {
+                            Image(systemName: icon).font(.system(size: 14, weight: .semibold))
+                        }
+                        Text(button.title ?? "")
+                            .font(.system(size: 16, weight: .semibold))
+                            .multilineTextAlignment(.center)
+                    }
+                    .foregroundColor(WACard.link)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(WaCardButtonStyle())
+            }
+        }
+    }
+}
+
 struct WaChecklistBubble: View {
     let text: String
     let items: [String]
@@ -117,6 +482,7 @@ struct WaChecklistBubble: View {
 
 struct WaAssetBubble: View {
     let assetName: String
+    let imageURL: String?
     let text: String?
     let buttons: [MessageButton]?
     let timestamp: Date
@@ -133,12 +499,26 @@ struct WaAssetBubble: View {
         isCurrentUser ? Color(red: 0.851, green: 0.992, blue: 0.831) : .white
     }
 
+    @ObservedObject private var images = WAImageCache.shared
+
+    private var remote: UIImage? {
+        guard let raw = imageURL?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else { return nil }
+        return images.image(for: URL(string: raw))
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            Image(assetName)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
+            if let remote {
+                Image(uiImage: remote)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+            } else if !assetName.isEmpty {
+                Image(assetName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+            }
 
             if let text, !text.isEmpty {
                 Text(text)
@@ -211,7 +591,10 @@ struct MessageBubble: View {
     private var hasAsset: Bool { !(message.assetName ?? "").isEmpty }
     private var hasText: Bool { !message.text.isEmpty }
     private var hasOptions: Bool { !(message.options?.isEmpty ?? true) }
-    private var hasContent: Bool { hasImage || hasAsset || hasText || hasOptions }
+    private var hasButtons: Bool { !(message.buttons?.isEmpty ?? true) }
+    private var hasCard: Bool { message.card != nil }
+    private var isCard: Bool { hasAsset || hasButtons || hasCard }
+    private var hasContent: Bool { hasImage || hasAsset || hasText || hasOptions || hasButtons || hasCard }
 
     var body: some View {
         if hasContent {
@@ -219,9 +602,16 @@ struct MessageBubble: View {
                 if message.isCurrentUser { Spacer(minLength: 52) }
 
                 VStack(alignment: message.isCurrentUser ? .trailing : .leading, spacing: 4) {
-                    if hasAsset {
+                    if let card = message.card {
+                        WABaggageCard(
+                            card: card,
+                            buttons: message.buttons,
+                            timestamp: message.timestamp
+                        )
+                    } else if hasAsset || hasButtons {
                         WaAssetBubble(
                             assetName: message.assetName ?? "",
+                            imageURL: message.imageURL,
                             text: hasText ? message.text : nil,
                             buttons: message.buttons,
                             timestamp: message.timestamp,
@@ -260,7 +650,7 @@ struct MessageBubble: View {
                         .padding(.top, hasText || hasImage ? 4 : 0)
                     }
                 }
-                .frame(maxWidth: hasAsset ? 300 : 264, alignment: message.isCurrentUser ? .trailing : .leading)
+                .frame(maxWidth: isCard ? 300 : 264, alignment: message.isCurrentUser ? .trailing : .leading)
 
                 if !message.isCurrentUser { Spacer(minLength: 52) }
             }

@@ -297,18 +297,58 @@ final class WAImageCache: ObservableObject {
         } as [URL?])
     }
 
-    private func load(_ url: URL) {
-        if image(for: url) != nil || inFlight.contains(url) { return }
+    func preload(from scenarios: [ChatScenario], timeout: TimeInterval = 8, completion: @escaping () -> Void) {
+        var urls: [URL] = []
+        for scenario in scenarios {
+            let config = scenario.chatConfig
+            for raw in [config.agentImageURL, config.contactImageURL] {
+                if let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !trimmed.isEmpty, let url = URL(string: trimmed) {
+                    urls.append(url)
+                }
+            }
+            for day in config.messagesFilteredByDate ?? [] {
+                for message in day.messages ?? [] {
+                    if let trimmed = message.imageURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+                       !trimmed.isEmpty, let url = URL(string: trimmed) {
+                        urls.append(url)
+                    }
+                }
+            }
+        }
+
+        let pending = urls.filter { image(for: $0) == nil }
+        guard !pending.isEmpty else { completion(); return }
+
+        var finished = false
+        let group = DispatchGroup()
+        for url in pending {
+            group.enter()
+            load(url) { group.leave() }
+        }
+        group.notify(queue: .main) {
+            if !finished { finished = true; completion() }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+            if !finished { finished = true; completion() }
+        }
+    }
+
+    private func load(_ url: URL, done: (() -> Void)? = nil) {
+        if image(for: url) != nil { done?(); return }
+        if inFlight.contains(url) { done?(); return }
         inFlight.insert(url)
 
         URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let self else { return }
+            guard let self else { done?(); return }
             let decoded = data.flatMap { UIImage(data: $0) }
             DispatchQueue.main.async {
                 self.inFlight.remove(url)
-                guard let decoded else { return }
-                self.cache.setObject(decoded, forKey: url as NSURL)
-                self.objectWillChange.send()
+                if let decoded {
+                    self.cache.setObject(decoded, forKey: url as NSURL)
+                    self.objectWillChange.send()
+                }
+                done?()
             }
         }.resume()
     }

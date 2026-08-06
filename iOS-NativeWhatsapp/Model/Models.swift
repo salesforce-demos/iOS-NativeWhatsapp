@@ -130,6 +130,7 @@ struct JSONMessage: Codable, Identifiable {
     let buttons: [MessageButton]?
     let typingSeconds: Double?
     let pauseSeconds: Double?
+    let card: CardContent?
 
     var isCurrentUser: Bool {
         return sender == "Customer"
@@ -150,6 +151,48 @@ struct JSONMessage: Codable, Identifiable {
     var hasActions: Bool {
         return !(actions?.isEmpty ?? true)
     }
+}
+
+struct CardTile: Codable, Equatable {
+    let label: String?
+    let value: String?
+    let style: String?
+    let mono: Bool?
+}
+
+struct CardItem: Codable, Equatable {
+    let text: String?
+    let icon: String?
+}
+
+struct CardSection: Codable, Equatable {
+    let title: String?
+    let icon: String?
+    let style: String?
+    let items: [CardItem]?
+}
+
+struct CardContent: Codable, Equatable {
+    let headerTitle: String?
+    let headerChip: String?
+    let tripTitle: String?
+    let tripIcon: String?
+    let fromCode: String?
+    let fromName: String?
+    let toCode: String?
+    let toName: String?
+    let progress: Double?
+    let tiles: [CardTile]?
+    let tripNote: String?
+    let alertBadge: String?
+    let alertTitle: String?
+    let alertBody: String?
+    let alertPlace: String?
+    let alertPlaceDetail: String?
+    let alertChip: String?
+    let sections: [CardSection]?
+    let footNote: String?
+    let footNoteIcon: String?
 }
 
 struct MessageButton: Codable, Identifiable, Equatable {
@@ -210,6 +253,7 @@ struct UIMessage: Identifiable, Equatable {
     let assetName: String?
     let items: [String]?
     let buttons: [MessageButton]?
+    let card: CardContent?
 
     init(text: String,
          isCurrentUser: Bool,
@@ -219,7 +263,8 @@ struct UIMessage: Identifiable, Equatable {
          component: String? = nil,
          assetName: String? = nil,
          items: [String]? = nil,
-         buttons: [MessageButton]? = nil) {
+         buttons: [MessageButton]? = nil,
+         card: CardContent? = nil) {
         self.text = text
         self.isCurrentUser = isCurrentUser
         self.timestamp = timestamp
@@ -229,6 +274,7 @@ struct UIMessage: Identifiable, Equatable {
         self.assetName = assetName
         self.items = items
         self.buttons = buttons
+        self.card = card
     }
 
     static func == (lhs: UIMessage, rhs: UIMessage) -> Bool {
@@ -240,6 +286,7 @@ struct UIMessage: Identifiable, Equatable {
                lhs.component == rhs.component &&
                lhs.assetName == rhs.assetName &&
                lhs.items == rhs.items &&
-               lhs.buttons == rhs.buttons
+               lhs.buttons == rhs.buttons &&
+               lhs.card == rhs.card
     }
 }
