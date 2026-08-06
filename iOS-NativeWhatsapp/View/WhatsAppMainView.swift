@@ -105,6 +105,7 @@ struct WAChatsView: View {
                                 chatRow(for: scenario.chatConfig)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
+                                        listVM.markAsRead(scenario.chatConfig)
                                         tabBarHidden = true
                                         selectedConfig = scenario.chatConfig
                                     }
@@ -159,6 +160,7 @@ struct WAChatsView: View {
 
                         WAGlassCircleButton(fill: WA.green, action: {
                             if let first = listVM.chatScenarios.first {
+                                listVM.markAsRead(first.chatConfig)
                                 tabBarHidden = true
                                 selectedConfig = first.chatConfig
                             }
@@ -189,6 +191,9 @@ struct WAChatsView: View {
             }
         }
         .task { listVM.loadChats() }
+        .onChange(of: isLocked) { _, locked in
+            if locked { listVM.resetReadState() }
+        }
         .onChange(of: listVM.chatScenarios.count) { _, _ in
             for scenario in listVM.chatScenarios {
                 if let raw = scenario.chatConfig.chatURL?.trimmingCharacters(in: .whitespacesAndNewlines),

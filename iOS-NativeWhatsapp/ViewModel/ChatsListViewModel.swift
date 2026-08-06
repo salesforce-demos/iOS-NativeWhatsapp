@@ -4,6 +4,7 @@ class ChatsListViewModel: ObservableObject {
     @Published var chatScenarios: [ChatScenario] = []
     @Published var isLoading = true
     @Published var errorMessage: String? = nil
+    @Published private(set) var readChats: Set<String> = []
 
     func loadChats() {
         isLoading = true
@@ -39,11 +40,24 @@ class ChatsListViewModel: ObservableObject {
     }
 
     func unreadCount(for config: ChatConfig) -> Int {
-        max(0, config.unreadCount ?? 0)
+        if readChats.contains(key(for: config)) { return 0 }
+        return max(0, config.unreadCount ?? 0)
+    }
+
+    func markAsRead(_ config: ChatConfig) {
+        readChats.insert(key(for: config))
+    }
+
+    func resetReadState() {
+        readChats.removeAll()
+    }
+
+    private func key(for config: ChatConfig) -> String {
+        config.configName + "|" + config.contactName
     }
 
     var unreadChats: Int {
-        chatScenarios.filter { ($0.chatConfig.unreadCount ?? 0) > 0 }.count
+        chatScenarios.filter { unreadCount(for: $0.chatConfig) > 0 }.count
     }
 
     var groupChats: Int {
