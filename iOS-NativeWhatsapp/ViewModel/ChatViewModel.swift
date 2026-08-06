@@ -108,6 +108,7 @@ class ChatViewModel: ObservableObject {
 
         if let rawImage = config.agentImageURL ?? config.botImageURL {
             self.contactAvatarURL = resolveImageURL(rawPath: rawImage)
+            WAImageCache.shared.prefetch([self.contactAvatarURL])
         }
 
         if let statusBarConfig = config.statusBar {

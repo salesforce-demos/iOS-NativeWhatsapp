@@ -67,7 +67,8 @@ struct WAStatusBarSlot: View {
 struct WAChatWallpaper: View {
     var dimmed: Bool = true
 
-    private var hasAsset: Bool { UIImage(named: "fondoWhatsapp") != nil }
+    private static let asset = UIImage(named: "fondoWhatsapp")
+    private var hasAsset: Bool { Self.asset != nil }
 
     var body: some View {
         (hasAsset ? Color.white : WA.wallpaper)
@@ -270,6 +271,49 @@ struct StickerIcon: View {
     }
 }
 
+final class WAImageCache: ObservableObject {
+    static let shared = WAImageCache()
+
+    private let cache = NSCache<NSURL, UIImage>()
+    private var inFlight: Set<URL> = []
+
+    private init() {
+        cache.countLimit = 60
+    }
+
+    func image(for url: URL?) -> UIImage? {
+        guard let url else { return nil }
+        return cache.object(forKey: url as NSURL)
+    }
+
+    func prefetch(_ urls: [URL?]) {
+        for case let url? in urls { load(url) }
+    }
+
+    func prefetch(_ strings: [String?]) {
+        prefetch(strings.compactMap { raw -> URL? in
+            guard let raw = raw?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else { return nil }
+            return URL(string: raw)
+        } as [URL?])
+    }
+
+    private func load(_ url: URL) {
+        if image(for: url) != nil || inFlight.contains(url) { return }
+        inFlight.insert(url)
+
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            guard let self else { return }
+            let decoded = data.flatMap { UIImage(data: $0) }
+            DispatchQueue.main.async {
+                self.inFlight.remove(url)
+                guard let decoded else { return }
+                self.cache.setObject(decoded, forKey: url as NSURL)
+                self.objectWillChange.send()
+            }
+        }.resume()
+    }
+}
+
 struct WAVerifiedBadge: View {
     var size: CGFloat = 15
 
@@ -286,41 +330,40 @@ struct AvatarView: View {
     let size: CGFloat
     var isLogo: Bool = false
 
+    @ObservedObject private var images = WAImageCache.shared
+
     var body: some View {
         ZStack {
             Circle()
                 .fill(isLogo ? Color.white : Color(red: 0.33, green: 0.60, blue: 0.57))
                 .frame(width: size, height: size)
 
-            if let url = url {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        initialsView
-                    case .success(let image):
-                        if isLogo {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .padding(size * 0.12)
-                                .frame(width: size, height: size)
-                                .clipShape(Circle())
-                        } else {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: size, height: size)
-                                .clipShape(Circle())
-                        }
-                    case .failure:
-                        initialsView
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
+            if let cached = images.image(for: url) {
+                picture(Image(uiImage: cached))
+            } else if url != nil {
+                initialsView
+                    .onAppear { images.prefetch([url]) }
             } else {
                 initialsView
             }
+        }
+    }
+
+    @ViewBuilder
+    private func picture(_ image: Image) -> some View {
+        if isLogo {
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .padding(size * 0.12)
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+        } else {
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: size, height: size)
+                .clipShape(Circle())
         }
     }
 

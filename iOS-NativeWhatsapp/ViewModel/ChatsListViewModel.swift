@@ -16,6 +16,9 @@ class ChatsListViewModel: ObservableObject {
                 switch result {
                 case .success(let scenarios):
                     self.chatScenarios = scenarios
+                    WAImageCache.shared.prefetch(
+                        scenarios.flatMap { [$0.chatConfig.agentImageURL, $0.chatConfig.contactImageURL] }
+                    )
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }
