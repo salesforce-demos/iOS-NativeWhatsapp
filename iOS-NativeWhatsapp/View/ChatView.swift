@@ -31,7 +31,6 @@ struct ChatView: View {
     }
 
     private let inputRowHeight: CGFloat = WA.inputRowHeight
-    private let suggestionHeight: CGFloat = 100
     private let extraBottomPadding: CGFloat = 16
     private let headerHeight: CGFloat = WA.headerHeight
 
@@ -257,25 +256,6 @@ private extension ChatView {
 
     var inputBar: some View {
         VStack(spacing: 0) {
-            if vm.showSuggestion, let suggestion = vm.currentSuggestion {
-                BubbleSuggestionView(
-                    suggestion: suggestion,
-                    onTap: {
-                        inputText = ""
-                        vm.applySuggestionAndSend()
-                        isInputFocused = true
-                    }
-                )
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-                .transition(
-                    .asymmetric(
-                        insertion: .move(edge: .bottom).combined(with: .opacity),
-                        removal: .move(edge: .bottom).combined(with: .opacity)
-                    )
-                )
-            }
-
             HStack(alignment: .bottom, spacing: 0) {
                 plusButton
                     .padding(.leading, 5)
@@ -334,9 +314,6 @@ private extension ChatView {
                 .tint(WA.green)
                 .padding(.vertical, 5)
                 .padding(.leading, 14)
-                .onChange(of: inputText) { _, newValue in
-                    vm.updateSuggestion(for: newValue)
-                }
 
             Button(action: {}) {
                 StickerIcon(size: 15, lineWidth: 1.15, color: .black)
@@ -394,41 +371,34 @@ private extension ChatView {
     var isWebChat: Bool { vm.chatURL != nil }
 
     func sendCurrentMessage() {
-        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-
-        if isWebChat {
-            web.sendMessage()
-            web.scrollToBottom()
-        } else {
-            vm.sendTextMessage(text)
-        }
-        inputText = ""
+        advanceConversation()
     }
 
     func advanceConversation() {
-        guard !inputText.isEmpty else { deliverAdvance(); return }
+        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !inputText.isEmpty else { deliverAdvance(text: ""); return }
 
         draftToken += 1
         withAnimation(.easeIn(duration: 0.18)) { draftSending = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             inputText = ""
             draftSending = false
-            deliverAdvance()
+            deliverAdvance(text: text)
         }
     }
 
-    private func deliverAdvance() {
+    private func deliverAdvance(text: String) {
         if isWebChat {
             conversationStarted = true
             web.sendMessage()
             web.scrollToBottom()
-        } else {
+        } else if vm.canManuallyAdvance {
             vm.manualTrigger()
+        } else if !text.isEmpty {
+            vm.sendTextMessage(text)
         }
     }
 
-    /// Escribe el borrador letra por letra, como si lo tecleara alguien.
     func typeDraft() {
         let draft = vm.draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !draft.isEmpty, inputText.isEmpty else { return }
@@ -445,9 +415,8 @@ private extension ChatView {
     }
 
     func webBottomInset(safeBottom: CGFloat) -> CGFloat {
-        let suggestionSpace: CGFloat = vm.showSuggestion ? suggestionHeight + 8 : 0
         let keyboardSpace: CGFloat = keyboard.height > 0 ? keyboard.height - safeBottom : 0
-        return inputRowHeight + suggestionSpace + keyboardSpace
+        return inputRowHeight + keyboardSpace
     }
 
     func scrollToBottom(proxy: ScrollViewProxy, delay: Double = 0.22) {
@@ -487,11 +456,10 @@ private extension ChatView {
     }
 
     func inputBottomInset(safeBottom: CGFloat) -> CGFloat {
-        let suggestionSpace: CGFloat = vm.showSuggestion ? suggestionHeight + 8 : 0
         if keyboard.height > 0 {
-            return keyboard.height - safeBottom + inputRowHeight + suggestionSpace + extraBottomPadding
+            return keyboard.height - safeBottom + inputRowHeight + extraBottomPadding
         } else {
-            return safeBottom + inputRowHeight + suggestionSpace + extraBottomPadding
+            return safeBottom + inputRowHeight + extraBottomPadding
         }
     }
 }

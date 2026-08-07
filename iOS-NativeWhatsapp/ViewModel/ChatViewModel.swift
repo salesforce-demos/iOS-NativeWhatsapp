@@ -147,6 +147,11 @@ class ChatViewModel: ObservableObject {
         return URL(string: fullString)
     }
 
+    var canManuallyAdvance: Bool {
+        guard currentStepIndex < script.count else { return false }
+        return !script[currentStepIndex].shouldAutoSend
+    }
+
     func manualTrigger() {
         if !isTyping && currentStepIndex < script.count {
             let nextMsg = script[currentStepIndex]
