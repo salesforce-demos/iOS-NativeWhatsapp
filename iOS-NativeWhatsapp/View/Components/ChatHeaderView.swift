@@ -389,6 +389,8 @@ final class SVGRenderer: NSObject, WKNavigationDelegate {
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.contentInset = .zero
         super.init()
         webView.navigationDelegate = self
     }

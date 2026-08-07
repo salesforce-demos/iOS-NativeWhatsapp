@@ -655,7 +655,7 @@ struct MessageBubble: View {
                 if !message.isCurrentUser { Spacer(minLength: 52) }
             }
             .padding(.horizontal, 8)
-            .padding(.vertical, 2)
+            .padding(.vertical, 5)
         }
     }
 
@@ -687,103 +687,93 @@ private struct WaBubbleWithImage: View {
     let isCurrentUser: Bool
 
     @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject private var images = WAImageCache.shared
 
     private var bubbleColor: Color {
         isCurrentUser
             ? (colorScheme == .dark ? .waBubbleOutDark : .waBubbleOutLight)
             : (colorScheme == .dark ? .waBubbleInDark : .waBubbleInLight)
     }
-    private var textColor: Color {
-        colorScheme == .dark ? .white.opacity(0.92) : .black.opacity(0.85)
-    }
-    private var timeColor: Color {
-        colorScheme == .dark ? .white.opacity(0.38) : .black.opacity(0.42)
-    }
-    private var tickColor: Color {
-        colorScheme == .dark ? .waTickDark : .waTick
-    }
+    private var textColor: Color { colorScheme == .dark ? .white.opacity(0.92) : .black.opacity(0.85) }
+    private var timeColor: Color { colorScheme == .dark ? .white.opacity(0.38) : .black.opacity(0.42) }
+    private var tickColor: Color { colorScheme == .dark ? .waTickDark : .waTick }
     private var timeString: String {
         let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "h:mm a"
         return f.string(from: timestamp)
     }
 
-    @ObservedObject private var images = WAImageCache.shared
-
     var body: some View {
-        VStack(alignment: .trailing, spacing: 0) {
-            if let cached = images.image(for: imageURL) {
-                Image(uiImage: cached)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-            } else {
-                ZStack {
-                    Color.black.opacity(0.04)
-                    ProgressView().tint(.gray)
-                }
-                .frame(height: 200)
-                .onAppear { images.prefetch([imageURL]) }
-            }
+        VStack(alignment: .leading, spacing: 0) {
+            picture
+                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .padding(3)
 
             if let text, !text.isEmpty {
-                VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(text)
                         .font(.system(size: 16))
                         .foregroundColor(textColor)
-                        .frame(maxWidth: 220, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    HStack(spacing: 3) {
-                        Text(timeString)
-                            .font(.system(size: 11))
-                            .foregroundColor(timeColor)
-                        if isCurrentUser {
-                            ZStack {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(tickColor)
-                                    .offset(x: -4)
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(tickColor)
-                                    .offset(x: 2)
-                            }
-                            .frame(width: 18, height: 12)
-                        }
-                    }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    meta
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-            } else {
-                HStack(spacing: 3) {
-                    Text(timeString)
-                        .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.85))
-                    if isCurrentUser {
-                        ZStack {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.white.opacity(0.85))
-                                .offset(x: -4)
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.white.opacity(0.85))
-                                .offset(x: 2)
-                        }
-                        .frame(width: 18, height: 12)
-                    }
-                }
-                .padding(6)
-                .background(Color.black.opacity(0.35))
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .padding(6)
+                .padding(.horizontal, 9)
+                .padding(.top, 4)
+                .padding(.bottom, 7)
             }
         }
+        .background(bubbleColor)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(bubbleColor)
-                .shadow(color: .black.opacity(colorScheme == .dark ? 0.3 : 0.08), radius: 1, x: 0, y: 1)
-        )
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.3 : 0.08), radius: 1, x: 0, y: 1)
+        .overlay(alignment: .bottomTrailing) {
+            if text?.isEmpty ?? true {
+                meta
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color.black.opacity(0.35)))
+                    .padding(9)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var picture: some View {
+        if let cached = images.image(for: imageURL) {
+            Image(uiImage: cached)
+                .resizable()
+                .aspectRatio(cached.size, contentMode: .fit)
+                .frame(maxWidth: .infinity)
+        } else {
+            ZStack {
+                Color.black.opacity(0.05)
+                ProgressView().tint(.gray)
+            }
+            .frame(height: 220)
+            .frame(maxWidth: .infinity)
+            .onAppear { images.prefetch([imageURL]) }
+        }
+    }
+
+    private var meta: some View {
+        HStack(spacing: 3) {
+            Text(timeString)
+                .font(.system(size: 11))
+                .foregroundColor(text?.isEmpty ?? true ? .white.opacity(0.9) : timeColor)
+            if isCurrentUser {
+                ZStack {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .offset(x: -4)
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .offset(x: 2)
+                }
+                .foregroundColor(text?.isEmpty ?? true ? .white.opacity(0.9) : tickColor)
+                .frame(width: 18, height: 12)
+            }
+        }
     }
 }
 
