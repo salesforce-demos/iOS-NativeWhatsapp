@@ -158,6 +158,11 @@ private extension ChatView {
             }
         }
         .onChange(of: keyboard.height) { oldHeight, newHeight in
+            web.sendKeyboard(
+                height: newHeight,
+                duration: keyboard.animationDuration,
+                screenHeight: UIScreen.main.bounds.height
+            )
             if newHeight > oldHeight { web.scrollToBottom() }
         }
         .onChange(of: isInputFocused) { _, focused in

@@ -7,6 +7,7 @@ final class ChatWebController: ObservableObject {
 
     var dayLabel: String = "Today"
     var topGapPoints: CGFloat = 146
+    var keyboardEventName: String = "keyboard_nextgen_chat"
 
     fileprivate weak var webView: WKWebView?
 
@@ -16,6 +17,21 @@ final class ChatWebController: ObservableObject {
 
     func sendMessageSimple() {
         evaluate("window.dispatchEvent(new CustomEvent('send_msg_nextgen_chat'));")
+    }
+
+    func sendKeyboard(height: CGFloat, duration: Double, screenHeight: CGFloat) {
+        let visible = height > 1
+        let js = """
+        (function(){
+          var detail = { visible: \(visible), height: \(Int(height)), duration: \(duration),
+                         screenHeight: \(Int(screenHeight)), unit: 'pt' };
+          document.documentElement.style.setProperty('--keyboard-height', detail.height + 'px');
+          document.documentElement.style.setProperty('--keyboard-visible', detail.visible ? '1' : '0');
+          window.__nativeKeyboard = detail;
+          window.dispatchEvent(new CustomEvent('\(keyboardEventName)', { detail: detail }));
+        })();
+        """
+        evaluate(js)
     }
 
     func reload() {
