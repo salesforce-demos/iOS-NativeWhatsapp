@@ -1,4 +1,5 @@
 import SwiftUI
+import WebKit
 
 enum WA {
     static func p3(_ hex: UInt32) -> Color {
@@ -341,16 +342,109 @@ final class WAImageCache: ObservableObject {
 
         URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
             guard let self else { done?(); return }
-            let decoded = data.flatMap { UIImage(data: $0) }
             DispatchQueue.main.async {
-                self.inFlight.remove(url)
-                if let decoded {
-                    self.cache.setObject(decoded, forKey: url as NSURL)
-                    self.objectWillChange.send()
+                if let data, let bitmap = UIImage(data: data) {
+                    self.finish(url, image: bitmap, done: done)
+                } else if let data, let svg = String(data: data, encoding: .utf8), svg.contains("<svg") {
+                    SVGRenderer.render(svg: svg, width: 300) { rendered in
+                        self.finish(url, image: rendered, done: done)
+                    }
+                } else {
+                    self.inFlight.remove(url)
+                    done?()
                 }
-                done?()
             }
         }.resume()
+    }
+
+    private func finish(_ url: URL, image: UIImage?, done: (() -> Void)?) {
+        inFlight.remove(url)
+        if let image {
+            cache.setObject(image, forKey: url as NSURL)
+            objectWillChange.send()
+        }
+        done?()
+    }
+}
+
+final class SVGRenderer: NSObject, WKNavigationDelegate {
+    private static var live: Set<SVGRenderer> = []
+
+    private let webView: WKWebView
+    private let width: CGFloat
+    private let completion: (UIImage?) -> Void
+    private var finished = false
+
+    static func render(svg: String, width: CGFloat, completion: @escaping (UIImage?) -> Void) {
+        let renderer = SVGRenderer(width: width, completion: completion)
+        live.insert(renderer)
+        renderer.start(svg: svg)
+    }
+
+    private init(width: CGFloat, completion: @escaping (UIImage?) -> Void) {
+        self.width = width
+        self.completion = completion
+        let configuration = WKWebViewConfiguration()
+        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: width, height: width * 4), configuration: configuration)
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        super.init()
+        webView.navigationDelegate = self
+    }
+
+    private func start(svg: String) {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+        webView.frame = CGRect(x: -5000, y: 0, width: width, height: width * 4)
+        webView.isUserInteractionEnabled = false
+        window?.insertSubview(webView, at: 0)
+
+        let html = """
+        <html><head><meta name="viewport" content="width=\(Int(width)), initial-scale=1">
+        <style>html,body{margin:0;padding:0;background:transparent}svg{width:100%;height:auto;display:block}</style>
+        </head><body>\(svg)</body></html>
+        """
+        webView.loadHTMLString(html, baseURL: nil)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in self?.deliver(nil) }
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in self?.snapshot() }
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        deliver(nil)
+    }
+
+    private func snapshot() {
+        webView.evaluateJavaScript("document.querySelector('svg') ? document.querySelector('svg').getBoundingClientRect().height : 0") { [weak self] value, _ in
+            guard let self else { return }
+            let height = (value as? Double) ?? 0
+            guard height > 1 else { self.deliver(nil); return }
+
+            self.webView.frame = CGRect(x: -5000, y: 0, width: self.width, height: CGFloat(height))
+            let configuration = WKSnapshotConfiguration()
+            configuration.rect = CGRect(x: 0, y: 0, width: self.width, height: CGFloat(height))
+            configuration.snapshotWidth = NSNumber(value: Double(self.width))
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                self.webView.takeSnapshot(with: configuration) { image, _ in
+                    self.deliver(image)
+                }
+            }
+        }
+    }
+
+    private func deliver(_ image: UIImage?) {
+        guard !finished else { return }
+        finished = true
+        webView.removeFromSuperview()
+        completion(image)
+        SVGRenderer.live.remove(self)
     }
 }
 

@@ -593,7 +593,7 @@ struct MessageBubble: View {
     private var hasOptions: Bool { !(message.options?.isEmpty ?? true) }
     private var hasButtons: Bool { !(message.buttons?.isEmpty ?? true) }
     private var hasCard: Bool { message.card != nil }
-    private var isCard: Bool { hasAsset || hasButtons || hasCard }
+    private var isCard: Bool { hasAsset || hasButtons || hasCard || hasImage }
     private var hasContent: Bool { hasImage || hasAsset || hasText || hasOptions || hasButtons || hasCard }
 
     var body: some View {
@@ -707,23 +707,22 @@ private struct WaBubbleWithImage: View {
         return f.string(from: timestamp)
     }
 
+    @ObservedObject private var images = WAImageCache.shared
+
     var body: some View {
         VStack(alignment: .trailing, spacing: 0) {
-            AsyncImage(url: imageURL) { phase in
-                switch phase {
-                case .empty:
-                    Color.gray.opacity(0.15).frame(width: 220, height: 160)
-                case .success(let image):
-                    image.resizable().scaledToFill()
-                        .frame(maxWidth: 220, maxHeight: 220)
-                        .clipped()
-                case .failure:
-                    Image(systemName: "photo")
-                        .font(.system(size: 40)).foregroundColor(.gray)
-                        .frame(width: 220, height: 160)
-                        .background(Color.gray.opacity(0.15))
-                @unknown default: EmptyView()
+            if let cached = images.image(for: imageURL) {
+                Image(uiImage: cached)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+            } else {
+                ZStack {
+                    Color.black.opacity(0.04)
+                    ProgressView().tint(.gray)
                 }
+                .frame(height: 200)
+                .onAppear { images.prefetch([imageURL]) }
             }
 
             if let text, !text.isEmpty {
@@ -779,7 +778,6 @@ private struct WaBubbleWithImage: View {
                 .padding(6)
             }
         }
-        .frame(maxWidth: 220)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
