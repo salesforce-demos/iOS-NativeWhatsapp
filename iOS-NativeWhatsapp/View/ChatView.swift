@@ -10,6 +10,8 @@ struct ChatView: View {
     @State private var inputText = ""
     @State private var currentTime = Date()
     @State private var conversationStarted = false
+    @State private var draftSending = false
+    @State private var draftToken = 0
     @FocusState private var isInputFocused: Bool
 
     private let hasInjectedConfig: Bool
@@ -84,7 +86,9 @@ private extension ChatView {
         .gesture(TapGesture().onEnded { _ in isInputFocused = false })
         .task {
             if !hasInjectedConfig { vm.loadData() }
+            typeDraft()
         }
+        .onChange(of: vm.draftText) { _, _ in typeDraft() }
         .onChange(of: isLocked) { _, locked in
             if locked {
                 isInputFocused = false
@@ -324,6 +328,8 @@ private extension ChatView {
                 .textInputAutocapitalization(.sentences)
                 .focused($isInputFocused)
                 .font(.system(size: 17))
+                .opacity(draftSending ? 0 : 1)
+                .offset(y: draftSending ? -16 : 0)
                 .lineLimit(1...5)
                 .tint(WA.green)
                 .padding(.vertical, 5)
@@ -401,13 +407,40 @@ private extension ChatView {
     }
 
     func advanceConversation() {
+        guard !inputText.isEmpty else { deliverAdvance(); return }
+
+        draftToken += 1
+        withAnimation(.easeIn(duration: 0.18)) { draftSending = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+            inputText = ""
+            draftSending = false
+            deliverAdvance()
+        }
+    }
+
+    private func deliverAdvance() {
         if isWebChat {
             conversationStarted = true
             web.sendMessage()
             web.scrollToBottom()
-            inputText = ""
         } else {
             vm.manualTrigger()
+        }
+    }
+
+    /// Escribe el borrador letra por letra, como si lo tecleara alguien.
+    func typeDraft() {
+        let draft = vm.draftText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !draft.isEmpty, inputText.isEmpty else { return }
+
+        draftToken += 1
+        let token = draftToken
+        inputText = ""
+        for (index, character) in draft.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 + Double(index) * 0.035) {
+                guard token == draftToken else { return }
+                inputText.append(character)
+            }
         }
     }
 

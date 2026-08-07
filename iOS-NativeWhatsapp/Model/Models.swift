@@ -30,6 +30,7 @@ struct ChatConfig: Codable {
     let contactStatus: String?
 
     let lastMessage: String?
+    let draftText: String?
     let lastMessageTime: String?
     let unreadCount: Int?
     let isGroup: Bool?

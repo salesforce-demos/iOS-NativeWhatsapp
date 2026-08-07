@@ -169,7 +169,8 @@
               }
             ]
           }
-        ]
+        ],
+        "draftText": "Hi, this is my bag tag. It didn't arrive at baggage claim - can you help me find it?"
       }
     },
     {
@@ -206,7 +207,8 @@
           }
         },
         "notifications": [],
-        "businessName": "SF Service Demos"
+        "businessName": "SF Service Demos",
+        "draftText": "Hi, this is my bag tag. It didn't arrive at baggage claim - can you help me find it?"
       }
     }
   ]

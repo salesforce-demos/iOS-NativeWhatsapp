@@ -20,6 +20,7 @@ class ChatViewModel: ObservableObject {
     @Published var chatURL: URL? = nil
     @Published var isVerified: Bool = false
     @Published var businessName: String? = nil
+    @Published var draftText: String = ""
     @Published var isLogoAvatar: Bool = false
 
     private var script: [JSONMessage] = []
@@ -96,6 +97,7 @@ class ChatViewModel: ObservableObject {
         self.contactName = config.contactName.isEmpty ? "Contact" : config.contactName
         self.contactStatus = config.contactStatus ?? "online"
 
+        self.draftText = config.draftText ?? config.lastMessage ?? ""
         self.isVerified = config.isVerified ?? false
         self.businessName = config.businessName
         self.isLogoAvatar = (config.avatarStyle ?? "photo").lowercased() == "logo"
@@ -370,6 +372,7 @@ class ChatViewModel: ObservableObject {
         isVerified = false
         isLogoAvatar = false
         businessName = nil
+        draftText = ""
 
         script = []
         currentStepIndex = 0
