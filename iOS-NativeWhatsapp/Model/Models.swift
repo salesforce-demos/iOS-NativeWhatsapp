@@ -130,6 +130,7 @@ struct JSONMessage: Codable, Identifiable {
     let buttons: [MessageButton]?
     let typingSeconds: Double?
     let pauseSeconds: Double?
+    let imageAspect: Double?
     let card: CardContent?
 
     var isCurrentUser: Bool {
@@ -254,6 +255,7 @@ struct UIMessage: Identifiable, Equatable {
     let items: [String]?
     let buttons: [MessageButton]?
     let card: CardContent?
+    let imageAspect: Double?
 
     init(text: String,
          isCurrentUser: Bool,
@@ -264,7 +266,8 @@ struct UIMessage: Identifiable, Equatable {
          assetName: String? = nil,
          items: [String]? = nil,
          buttons: [MessageButton]? = nil,
-         card: CardContent? = nil) {
+         card: CardContent? = nil,
+         imageAspect: Double? = nil) {
         self.text = text
         self.isCurrentUser = isCurrentUser
         self.timestamp = timestamp
@@ -275,6 +278,7 @@ struct UIMessage: Identifiable, Equatable {
         self.items = items
         self.buttons = buttons
         self.card = card
+        self.imageAspect = imageAspect
     }
 
     static func == (lhs: UIMessage, rhs: UIMessage) -> Bool {
@@ -287,6 +291,7 @@ struct UIMessage: Identifiable, Equatable {
                lhs.assetName == rhs.assetName &&
                lhs.items == rhs.items &&
                lhs.buttons == rhs.buttons &&
-               lhs.card == rhs.card
+               lhs.card == rhs.card &&
+               lhs.imageAspect == rhs.imageAspect
     }
 }

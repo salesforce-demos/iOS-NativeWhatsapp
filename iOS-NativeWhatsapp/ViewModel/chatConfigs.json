@@ -47,7 +47,8 @@
                 "text": "Hi, this is my bag tag. It didn't arrive at baggage claim - can you help me find it?",
                 "sender": "Customer",
                 "sendAutimatically": false,
-                "imageURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/resource/pantalla"
+                "imageURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/resource/pantalla",
+                "imageAspect": 0.536
               },
               {
                 "day": "Today",

@@ -318,7 +318,8 @@ class ChatViewModel: ObservableObject {
             assetName: step?.assetName,
             items: step?.items,
             buttons: step?.buttons,
-            card: step?.card
+            card: step?.card,
+            imageAspect: step?.imageAspect
         )
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {

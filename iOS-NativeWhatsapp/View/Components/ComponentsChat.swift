@@ -598,8 +598,12 @@ struct MessageBubble: View {
 
     var body: some View {
         if hasContent {
-            HStack(alignment: .bottom, spacing: 0) {
-                if message.isCurrentUser { Spacer(minLength: 52) }
+            HStack(alignment: .center, spacing: 0) {
+                if message.isCurrentUser { Spacer(minLength: 24) }
+
+                if hasImage && message.isCurrentUser {
+                    WaForwardChip().padding(.trailing, 8)
+                }
 
                 VStack(alignment: message.isCurrentUser ? .trailing : .leading, spacing: 4) {
                     if let card = message.card {
@@ -628,7 +632,8 @@ struct MessageBubble: View {
                             imageURL: resolveImageURL(rawPath: message.imageURL ?? ""),
                             text: hasText ? message.text : nil,
                             timestamp: message.timestamp,
-                            isCurrentUser: message.isCurrentUser
+                            isCurrentUser: message.isCurrentUser,
+                            aspect: message.imageAspect
                         )
                     } else if hasText {
                         WaBubble(
@@ -652,7 +657,11 @@ struct MessageBubble: View {
                 }
                 .frame(maxWidth: isCard ? 300 : 264, alignment: message.isCurrentUser ? .trailing : .leading)
 
-                if !message.isCurrentUser { Spacer(minLength: 52) }
+                if hasImage && !message.isCurrentUser {
+                    WaForwardChip().padding(.leading, 8)
+                }
+
+                if !message.isCurrentUser { Spacer(minLength: 24) }
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
@@ -680,11 +689,40 @@ struct MessageBubble: View {
     }
 }
 
+struct WaForwardChip: View {
+    var body: some View {
+        Image(systemName: "arrowshape.turn.up.right.fill")
+            .font(.system(size: 15))
+            .foregroundStyle(.white)
+            .frame(width: 33, height: 33)
+            .background(Circle().fill(Color.black.opacity(0.16)))
+    }
+}
+
+struct WaDoubleCheck: View {
+    var color: Color
+    var size: CGFloat = 12
+
+    var body: some View {
+        ZStack {
+            Image(systemName: "checkmark")
+                .font(.system(size: size, weight: .regular))
+                .offset(x: -3.5)
+            Image(systemName: "checkmark")
+                .font(.system(size: size, weight: .regular))
+                .offset(x: 2.5)
+        }
+        .foregroundColor(color)
+        .frame(width: 19, height: 13)
+    }
+}
+
 private struct WaBubbleWithImage: View {
     let imageURL: URL?
     let text: String?
     let timestamp: Date
     let isCurrentUser: Bool
+    var aspect: Double? = nil
 
     @Environment(\.colorScheme) private var colorScheme
     @ObservedObject private var images = WAImageCache.shared
@@ -711,7 +749,7 @@ private struct WaBubbleWithImage: View {
             if let text, !text.isEmpty {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(text)
-                        .font(.system(size: 16))
+                        .font(.system(size: 17))
                         .foregroundColor(textColor)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -750,28 +788,19 @@ private struct WaBubbleWithImage: View {
                 Color.black.opacity(0.05)
                 ProgressView().tint(.gray)
             }
-            .frame(height: 220)
+            .aspectRatio(aspect ?? 0.75, contentMode: .fit)
             .frame(maxWidth: .infinity)
             .onAppear { images.prefetch([imageURL]) }
         }
     }
 
     private var meta: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             Text(timeString)
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundColor(text?.isEmpty ?? true ? .white.opacity(0.9) : timeColor)
             if isCurrentUser {
-                ZStack {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .offset(x: -4)
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .offset(x: 2)
-                }
-                .foregroundColor(text?.isEmpty ?? true ? .white.opacity(0.9) : tickColor)
-                .frame(width: 18, height: 12)
+                WaDoubleCheck(color: text?.isEmpty ?? true ? .white.opacity(0.9) : timeColor)
             }
         }
     }
@@ -813,22 +842,12 @@ private struct WaBubble: View {
     }
 
     private var metaView: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             Text(timeString)
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundColor(timeColor)
             if isCurrentUser {
-                ZStack {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(tickColor)
-                        .offset(x: -4)
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(tickColor)
-                        .offset(x: 2)
-                }
-                .frame(width: 18, height: 12)
+                WaDoubleCheck(color: timeColor)
             }
         }
     }
@@ -836,7 +855,7 @@ private struct WaBubble: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
             Text(text)
-                .font(.system(size: 16))
+                .font(.system(size: 17))
                 .foregroundColor(textColor)
                 .multilineTextAlignment(.leading)
                 .lineLimit(nil)
