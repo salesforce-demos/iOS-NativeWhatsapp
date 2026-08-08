@@ -308,7 +308,7 @@ private extension ChatView {
     }
 
     var plusButton: some View {
-        Button(action: { openMediaPreview() }) {
+        Button(action: {}) {
             Image(systemName: "plus")
                 .font(.system(size: 25, weight: .regular))
                 .foregroundStyle(.black)
