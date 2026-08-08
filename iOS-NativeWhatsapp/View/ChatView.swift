@@ -15,6 +15,7 @@ struct ChatView: View {
     @State private var showMediaPreview = false
     @State private var captionText = ""
     @State private var introStarted = false
+    @State private var previewSent = false
     @FocusState private var isInputFocused: Bool
 
     private let hasInjectedConfig: Bool
@@ -103,6 +104,7 @@ private extension ChatView {
                 isInputFocused = false
                 showMediaPreview = false
                 introStarted = false
+                previewSent = false
                 captionText = ""
                 if let url = vm.chatURL { ChatWebCache.shared.refresh(url) }
                 vm.resetChat()
@@ -130,7 +132,7 @@ private extension ChatView {
                     onLockAction()
                 }
             },
-            onTitleTap: { advanceConversation() },
+            onTitleTap: { headerTapped() },
             onVideoCall: { UIImpactFeedbackGenerator(style: .light).impactOccurred() },
             onVoiceCall: { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
         )
@@ -405,6 +407,14 @@ private extension ChatView {
         }
     }
 
+    func headerTapped() {
+        if vm.hasMediaPreview && !previewSent {
+            openMediaPreview()
+        } else {
+            advanceConversation()
+        }
+    }
+
     func openMediaPreview() {
         guard vm.hasMediaPreview, !showMediaPreview else { return }
 
@@ -416,6 +426,7 @@ private extension ChatView {
 
     func sendFromPreview() {
         draftToken += 1
+        previewSent = true
         withAnimation(.easeOut(duration: 0.22)) { showMediaPreview = false }
         deliverAdvance(text: captionText)
         captionText = ""
