@@ -312,7 +312,9 @@ struct WAChatsView: View {
         let lastTime = listVM.lastMessageTime(for: config)
         let unread = listVM.unreadCount(for: config)
 
-        return HStack(alignment: .top, spacing: 12) {
+        let hasPreview = !lastMsg.isEmpty
+
+        return HStack(alignment: hasPreview ? .top : .center, spacing: 12) {
             AvatarView(
                 url: URL(string: config.agentImageURL ?? config.contactImageURL ?? ""),
                 text: config.contactName,
@@ -321,7 +323,7 @@ struct WAChatsView: View {
             )
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                HStack(alignment: hasPreview ? .firstTextBaseline : .center, spacing: 4) {
                     Text(config.contactName)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.black)
@@ -338,32 +340,42 @@ struct WAChatsView: View {
                             .font(.system(size: 15))
                             .foregroundStyle(WA.secondary)
                     }
+
+                    if !hasPreview, unread > 0 {
+                        unreadBadge(unread)
+                    }
                 }
 
-                HStack(alignment: .top, spacing: 8) {
-                    Text(lastMsg)
-                        .font(.system(size: 16))
-                        .foregroundStyle(WA.secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                if hasPreview {
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(lastMsg)
+                            .font(.system(size: 16))
+                            .foregroundStyle(WA.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
 
-                    Spacer(minLength: 4)
+                        Spacer(minLength: 4)
 
-                    if unread > 0 {
-                        Text("\(unread)")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .frame(minWidth: 20, minHeight: 20)
-                            .background(Capsule().fill(WA.green))
+                        if unread > 0 {
+                            unreadBadge(unread)
+                        }
                     }
                 }
             }
-            .padding(.top, 2)
+            .padding(.top, hasPreview ? 2 : 0)
         }
         .padding(.leading, 20)
         .padding(.trailing, 16)
         .padding(.vertical, 10)
+    }
+
+    private func unreadBadge(_ count: Int) -> some View {
+        Text("\(count)")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .frame(minWidth: 20, minHeight: 20)
+            .background(Capsule().fill(WA.green))
     }
 }
 
