@@ -28,6 +28,7 @@
 		62C39D8A2F8E979D00838715 /* ChatsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C39D892F8E979C00838715 /* ChatsListViewModel.swift */; };
 		62EDC33D2F8849720081E29A /* WhatsAppMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EDC33C2F8849720081E29A /* WhatsAppMainView.swift */; };
 		62F1A0022F9000020000AAA2 /* ChatWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F1A0012F9000010000AAA1 /* ChatWebView.swift */; };
+		62F1A0042F9000040000AAA4 /* MediaPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F1A0032F9000030000AAA3 /* MediaPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,7 @@
 		62C39D892F8E979C00838715 /* ChatsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatsListViewModel.swift; sourceTree = "<group>"; };
 		62EDC33C2F8849720081E29A /* WhatsAppMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsAppMainView.swift; sourceTree = "<group>"; };
 		62F1A0012F9000010000AAA1 /* ChatWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatWebView.swift; sourceTree = "<group>"; };
+		62F1A0032F9000030000AAA3 /* MediaPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -146,6 +148,7 @@
 				6222B2752F5632E2005B2E2B /* StatusBar */,
 				629B50C02F4CA96A004DA746 /* ChatHeaderView.swift */,
 				62F1A0012F9000010000AAA1 /* ChatWebView.swift */,
+				62F1A0032F9000030000AAA3 /* MediaPreviewView.swift */,
 				629B50BE2F476019004DA746 /* NotificationCardView.swift */,
 				62065A5D2F71DD890033433B /* TextPathGlyph.swift */,
 				629B50AE2F44BF61004DA746 /* LockScreenButton.swift */,
@@ -237,6 +240,7 @@
 				18E24B3B2F3F7AFD007B6764 /* ComponentsChat.swift in Sources */,
 				629B50C12F4CA96A004DA746 /* ChatHeaderView.swift in Sources */,
 				62F1A0022F9000020000AAA2 /* ChatWebView.swift in Sources */,
+				62F1A0042F9000040000AAA4 /* MediaPreviewView.swift in Sources */,
 				62065A5E2F71DD890033433B /* TextPathGlyph.swift in Sources */,
 				18E24B412F3F7B42007B6764 /* RootView.swift in Sources */,
 				62C39D8A2F8E979D00838715 /* ChatsListViewModel.swift in Sources */,
@@ -379,7 +383,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS-NativeWhatsapp/Preview Content\"";
 				DEVELOPMENT_TEAM = 4WQ2T93P22;
 				ENABLE_PREVIEWS = YES;
@@ -412,7 +416,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS-NativeWhatsapp/Preview Content\"";
 				DEVELOPMENT_TEAM = 4WQ2T93P22;
 				ENABLE_PREVIEWS = YES;

@@ -12,6 +12,9 @@ struct ChatView: View {
     @State private var conversationStarted = false
     @State private var draftSending = false
     @State private var draftToken = 0
+    @State private var showMediaPreview = false
+    @State private var captionText = ""
+    @State private var introStarted = false
     @FocusState private var isInputFocused: Bool
 
     private let hasInjectedConfig: Bool
@@ -47,6 +50,12 @@ struct ChatView: View {
                 isCharging: vm.statusBarChatView?.isCharging ?? false
             )
             .background(WA.chrome)
+
+            if showMediaPreview {
+                mediaPreview
+                    .transition(.opacity)
+                    .zIndex(3)
+            }
         }
         .ignoresSafeArea(edges: .top)
     }
@@ -85,12 +94,16 @@ private extension ChatView {
         .gesture(TapGesture().onEnded { _ in isInputFocused = false })
         .task {
             if !hasInjectedConfig { vm.loadData() }
-            typeDraft()
+            startIntro()
         }
-        .onChange(of: vm.draftText) { _, _ in typeDraft() }
+        .onChange(of: vm.draftText) { _, _ in startIntro() }
+        .onChange(of: vm.previewImageURL) { _, _ in startIntro() }
         .onChange(of: isLocked) { _, locked in
             if locked {
                 isInputFocused = false
+                showMediaPreview = false
+                introStarted = false
+                captionText = ""
                 if let url = vm.chatURL { ChatWebCache.shared.refresh(url) }
                 vm.resetChat()
             } else {
@@ -280,7 +293,7 @@ private extension ChatView {
         .background(WA.chrome.ignoresSafeArea(edges: .bottom))
         .compositingGroup()
         .onAppear {
-            if !isLocked {
+            if !isLocked && !showMediaPreview {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     isInputFocused = true
                 }
@@ -369,6 +382,65 @@ private extension ChatView {
 
 private extension ChatView {
     var isWebChat: Bool { vm.chatURL != nil }
+
+    var mediaPreview: some View {
+        WAMediaPreviewView(
+            imageURL: vm.previewImageURL,
+            aspect: vm.previewAspect,
+            caption: captionText,
+            recipient: vm.contactName,
+            statusBar: vm.statusBarChatView,
+            onSend: { sendFromPreview() },
+            onClose: { closePreview() }
+        )
+    }
+
+    func startIntro() {
+        guard !introStarted else { return }
+
+        if vm.hasMediaPreview {
+            introStarted = true
+            isInputFocused = false
+            withAnimation(.easeOut(duration: 0.2)) { showMediaPreview = true }
+            typeCaption()
+        } else if !vm.draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            introStarted = true
+            typeDraft()
+        }
+    }
+
+    func sendFromPreview() {
+        draftToken += 1
+        withAnimation(.easeOut(duration: 0.22)) { showMediaPreview = false }
+        deliverAdvance(text: captionText)
+        captionText = ""
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isInputFocused = true }
+    }
+
+    func closePreview() {
+        draftToken += 1
+        withAnimation(.easeOut(duration: 0.22)) { showMediaPreview = false }
+        captionText = ""
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            isInputFocused = true
+            typeDraft()
+        }
+    }
+
+    func typeCaption() {
+        let text = vm.previewCaption.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+
+        draftToken += 1
+        let token = draftToken
+        captionText = ""
+        for (index, character) in text.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6 + Double(index) * 0.035) {
+                guard token == draftToken else { return }
+                captionText.append(character)
+            }
+        }
+    }
 
     func sendCurrentMessage() {
         advanceConversation()

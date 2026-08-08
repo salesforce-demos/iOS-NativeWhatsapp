@@ -302,7 +302,7 @@ final class WAImageCache: ObservableObject {
         var urls: [URL] = []
         for scenario in scenarios {
             let config = scenario.chatConfig
-            for raw in [config.agentImageURL, config.contactImageURL] {
+            for raw in [config.agentImageURL, config.contactImageURL, config.mediaPreview?.imageURL] {
                 if let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines),
                    !trimmed.isEmpty, let url = URL(string: trimmed) {
                     urls.append(url)

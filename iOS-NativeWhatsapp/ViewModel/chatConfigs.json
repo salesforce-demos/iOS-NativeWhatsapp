@@ -182,6 +182,12 @@
         "agentImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
         "contactImageURL": "https://www.southwest.com/apple-touch-icon-152x152.png",
         "chatURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/s/?recordName=SecondChat&wrapperMode=true",
+      "mediaPreview": {
+        "enabled": true,
+        "imageURL": "https://laulima-service-aug26.my.site.com/laulimafy27whatsapp/resource/pantalla",
+        "caption": "Hi, this is my bag tag. It didn't arrive at baggage claim - can you help me find it?",
+        "imageAspect": 0.536
+      },
         "lastMessage": "Your boarding pass is ready. Check in opens 24 hours before departure.",
         "lastMessageTime": "2:24 PM",
         "unreadCount": 3,

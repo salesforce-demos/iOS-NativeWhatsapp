@@ -21,6 +21,9 @@ class ChatViewModel: ObservableObject {
     @Published var isVerified: Bool = false
     @Published var businessName: String? = nil
     @Published var draftText: String = ""
+    @Published var previewImageURL: URL? = nil
+    @Published var previewCaption: String = ""
+    @Published var previewAspect: Double? = nil
     @Published var isLogoAvatar: Bool = false
 
     private var script: [JSONMessage] = []
@@ -123,10 +126,35 @@ class ChatViewModel: ObservableObject {
         self.script = config.messagesFilteredByDate?
             .flatMap { $0.messages ?? [] } ?? []
 
+        setupMediaPreview(with: config)
+
         self.currentStepIndex = 0
         self.messages = []
 
         checkNextStep()
+    }
+
+    var hasMediaPreview: Bool { previewImageURL != nil }
+
+    private func setupMediaPreview(with config: ChatConfig) {
+        self.previewImageURL = nil
+        self.previewCaption = ""
+        self.previewAspect = nil
+
+        let firstImageStep = script.first {
+            $0.isCurrentUser && !($0.imageURL?.isEmpty ?? true)
+        }
+
+        let preview = config.mediaPreview
+        if preview?.enabled == false { return }
+
+        let rawImage = preview?.imageURL ?? firstImageStep?.imageURL
+        guard let rawImage, !rawImage.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+
+        self.previewImageURL = resolveImageURL(rawPath: rawImage)
+        self.previewCaption = preview?.caption ?? firstImageStep?.contentText ?? self.draftText
+        self.previewAspect = preview?.imageAspect ?? firstImageStep?.imageAspect
+        WAImageCache.shared.prefetch([self.previewImageURL])
     }
 
     private func resolveImageURL(rawPath: String) -> URL? {
@@ -378,6 +406,9 @@ class ChatViewModel: ObservableObject {
         isLogoAvatar = false
         businessName = nil
         draftText = ""
+        previewImageURL = nil
+        previewCaption = ""
+        previewAspect = nil
 
         script = []
         currentStepIndex = 0

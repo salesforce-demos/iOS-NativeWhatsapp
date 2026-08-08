@@ -52,7 +52,15 @@ struct ChatConfig: Codable {
     let notifications: [NotificationConfig]?
     let nbaItems: [String]?
     let einsteinReplyItems: [String]?
+    let mediaPreview: MediaPreviewConfig?
     let messagesFilteredByDate: [DailyMessages]?
+}
+
+struct MediaPreviewConfig: Codable {
+    let enabled: Bool?
+    let imageURL: String?
+    let caption: String?
+    let imageAspect: Double?
 }
 
 struct StatusBarConfig: Codable {
