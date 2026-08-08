@@ -142,6 +142,7 @@ final class ChatWebCache {
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.overrideUserInterfaceStyle = .light
 
         views[url] = webView
         return webView
