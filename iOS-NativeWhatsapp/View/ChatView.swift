@@ -306,7 +306,7 @@ private extension ChatView {
     }
 
     var plusButton: some View {
-        Button(action: {}) {
+        Button(action: { openMediaPreview() }) {
             Image(systemName: "plus")
                 .font(.system(size: 25, weight: .regular))
                 .foregroundStyle(.black)
@@ -397,16 +397,21 @@ private extension ChatView {
 
     func startIntro() {
         guard !introStarted else { return }
+        guard !vm.hasMediaPreview else { introStarted = true; return }
 
-        if vm.hasMediaPreview {
-            introStarted = true
-            isInputFocused = false
-            withAnimation(.easeOut(duration: 0.2)) { showMediaPreview = true }
-            typeCaption()
-        } else if !vm.draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if !vm.draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             introStarted = true
             typeDraft()
         }
+    }
+
+    func openMediaPreview() {
+        guard vm.hasMediaPreview, !showMediaPreview else { return }
+
+        isInputFocused = false
+        inputText = ""
+        withAnimation(.easeOut(duration: 0.2)) { showMediaPreview = true }
+        typeCaption()
     }
 
     func sendFromPreview() {
@@ -421,10 +426,7 @@ private extension ChatView {
         draftToken += 1
         withAnimation(.easeOut(duration: 0.22)) { showMediaPreview = false }
         captionText = ""
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            isInputFocused = true
-            typeDraft()
-        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { isInputFocused = true }
     }
 
     func typeCaption() {
