@@ -313,40 +313,22 @@ class ChatViewModel: ObservableObject {
         currentStepIndex += 1
 
         if step.isCurrentUser {
-            addMessage(step.contentText, isCurrentUser: true, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime, step: step)
+            addMessage(step.contentText, isCurrentUser: true, imageURL: step.imageURL, options: step.options, step: step)
             checkNextStep()
         } else {
-            triggerFakeResponse(text: step.contentText, imageURL: step.imageURL, options: step.options, sendTime: step.sendTime, step: step)
+            triggerFakeResponse(text: step.contentText, imageURL: step.imageURL, options: step.options, step: step)
         }
-    }
-
-    private static func timestamp(from sendTime: String?) -> Date {
-        guard let raw = sendTime?.trimmingCharacters(in: .whitespaces), !raw.isEmpty else { return Date() }
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        for format in ["h:mm a", "h:mma", "HH:mm", "H:mm"] {
-            formatter.dateFormat = format
-            if let parsed = formatter.date(from: raw) {
-                let calendar = Calendar.current
-                let hm = calendar.dateComponents([.hour, .minute], from: parsed)
-                if let today = calendar.date(bySettingHour: hm.hour ?? 0, minute: hm.minute ?? 0, second: 0, of: Date()) {
-                    return today
-                }
-            }
-        }
-        return Date()
     }
 
     private func addMessage(_ text: String,
                             isCurrentUser: Bool,
                             imageURL: String? = nil,
                             options: [MessageOption]? = nil,
-                            sendTime: String? = nil,
                             step: JSONMessage? = nil) {
         let newMessage = UIMessage(
             text: text,
             isCurrentUser: isCurrentUser,
-            timestamp: Self.timestamp(from: sendTime),
+            timestamp: Date(),
             imageURL: imageURL,
             options: options,
             component: step?.component,
@@ -367,7 +349,7 @@ class ChatViewModel: ObservableObject {
         }
     }
 
-    private func triggerFakeResponse(text: String, imageURL: String? = nil, options: [MessageOption]? = nil, sendTime: String? = nil, step: JSONMessage? = nil) {
+    private func triggerFakeResponse(text: String, imageURL: String? = nil, options: [MessageOption]? = nil, step: JSONMessage? = nil) {
         withAnimation { self.isTyping = true }
         self.contactStatus = "typing…"
 
@@ -376,7 +358,7 @@ class ChatViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + typingDuration) { [weak self] in
             guard let self = self else { return }
 
-            self.addMessage(text, isCurrentUser: false, imageURL: imageURL, options: options, sendTime: sendTime, step: step)
+            self.addMessage(text, isCurrentUser: false, imageURL: imageURL, options: options, step: step)
             withAnimation { self.isTyping = false }
             self.contactStatus = "online"
 
