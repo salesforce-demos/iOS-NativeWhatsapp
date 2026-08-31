@@ -160,13 +160,12 @@ private extension ChatView {
             } else if web.isLoading {
                 ProgressView().tint(WA.secondary)
             }
-
-            WADateSeparator(text: formattedDay(for: Date()))
-                .padding(.top, headerHeight + 10)
-                .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.bottom, webBottomInset(safeBottom: geo.safeAreaInsets.bottom))
+        .safeAreaInset(edge: .top, spacing: 0) {
+            Color.clear.frame(height: headerHeight)
+        }
         .onAppear {
             web.dayLabel = formattedDay(for: Date())
             if conversationStarted {
